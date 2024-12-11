@@ -22,7 +22,7 @@
                 timerElement.innerText = --countdown;
                 if (countdown <= 0) {
                     clearInterval(interval);
-                    window.location.href = link; 
+                    window.location.href = decodedUrl; 
                 }
             }, 1000);
         } else {
