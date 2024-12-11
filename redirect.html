@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect Page</title>
+</head>
+<body>
+    <script>
+        // Lấy tham số 'url' từ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedUrl = urlParams.get('url');
+
+        // Giải mã URL
+        if (encodedUrl) {
+            const decodedUrl = atob(encodedUrl); // Giải mã base64
+            window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
+        } else {
+            document.body.innerText = "Không có URL để chuyển hướng.";
+        }
+    </script>
+</body>
+</html>
