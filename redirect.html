@@ -6,15 +6,31 @@
     <title>Redirect Page</title>
 </head>
 <body>
+    <h1>Please Wait 5s</h1>
+    <p id="countdown">Please Wait ... <span id="timer">5</span> giây.</p>
+
     <script>
         // Lấy tham số 'url' từ URL
         const urlParams = new URLSearchParams(window.location.search);
         const encodedUrl = urlParams.get('url');
 
-        // Giải mã URL
+        // Giải mã URL và thiết lập đếm ngược
         if (encodedUrl) {
             const decodedUrl = atob(encodedUrl); // Giải mã base64
-            window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
+            let countdown = 5; // Thời gian đếm ngược
+
+            // Cập nhật đếm ngược mỗi giây
+            const timerElement = document.getElementById('timer');
+            const interval = setInterval(() => {
+                countdown--;
+                timerElement.innerText = countdown;
+
+                // Khi đếm ngược đến 0, chuyển hướng
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
+                }
+            }, 1000);
         } else {
             document.body.innerText = "Không có URL để chuyển hướng.";
         }
