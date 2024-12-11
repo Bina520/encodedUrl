@@ -4,33 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirect Page</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Please Wait 5s</h1>
-    <p id="countdown">Please Wait ... <span id="timer">5</span> giây.</p>
+    <h1>Đang chuyển hướng...</h1>
+    <p id="countdown">Bạn sẽ được chuyển hướng sau <span id="timer">5</span> giây.</p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const base64Url = urlParams.get('url');
-        const secretKey = '764'; 
+        const secretKey = '764'; // Thay thế bằng khóa bí mật của bạn
         const timerElement = document.getElementById('timer');
 
         if (base64Url) {
-            const encrypted = atob(base64Url); 
+            const encrypted = atob(base64Url); // Giải mã Base64
             const decryptedBytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); 
+            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
             let countdown = 5;
 
             const interval = setInterval(() => {
                 timerElement.innerText = --countdown;
                 if (countdown <= 0) {
                     clearInterval(interval);
-                    window.location.href = decodedUrl; 
+                    window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
                 }
             }, 1000);
         } else {
-            document.body.innerText = "Not URL.";
+            document.body.innerText = "Không có URL để chuyển hướng.";
         }
     </script>
 </body>
