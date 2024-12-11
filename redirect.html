@@ -6,8 +6,8 @@
     <title>Redirect Page</title>
 </head>
 <body>
-    <h1>Đang chuyển hướng...</h1>
-    <p id="countdown">Bạn sẽ được chuyển hướng sau <span id="timer">5</span> giây.</p>
+    <h1>Please Wait 5s</h1>
+    <p id="countdown">Please Wait ... <span id="timer">5</span> s.</p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -26,7 +26,7 @@
                 }
             }, 1000);
         } else {
-            document.body.innerText = "Không có URL để chuyển hướng.";
+            document.body.innerText = "Not URL.";
         }
     </script>
 </body>
