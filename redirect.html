@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirect Page</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@8.5.1/build/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 </head>
 <body>
     <h1>Please Wait 5s</h1>
@@ -12,28 +12,25 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        const secretKey = '764'; // Thay thế bằng khóa bí mật của bạn
+        const base64Url = urlParams.get('url');
+        const secretKey = '764'; 
         const timerElement = document.getElementById('timer');
 
-        if (token) {
-            try {
-                const decoded = jwt.verify(token, secretKey); // Giải mã JWT
-                const decodedUrl = decoded.url; // Lấy URL gốc
-                let countdown = 5;
+        if (base64Url) {
+            const encrypted = atob(base64Url); 
+            const decryptedBytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); 
+            let countdown = 5;
 
-                const interval = setInterval(() => {
-                    timerElement.innerText = --countdown;
-                    if (countdown <= 0) {
-                        clearInterval(interval);
-                        window.location.href = decodedUrl;
-                    }
-                }, 1000);
-            } catch (error) {
-                document.body.innerText = "Token không hợp lệ hoặc đã hết hạn.";
-            }
+            const interval = setInterval(() => {
+                timerElement.innerText = --countdown;
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    window.location.href = decodedUrl; 
+                }
+            }, 1000);
         } else {
-            document.body.innerText = "Không có token để chuyển hướng.";
+            document.body.innerText = "Not URL.";
         }
     </script>
 </body>
