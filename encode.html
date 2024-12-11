@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã hóa URL</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@8.5.1/build/index.min.js"></script>
+</head>
+<body>
+    <h1>Mã hóa URL</h1>
+    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
+    <button onclick="encodeUrl()">Mã hóa</button>
+    <p id="encodedOutput"></p>
+
+    <script>
+        function encodeUrl() {
+            const url = document.getElementById('urlInput').value;
+            const secretKey = '764'; // Thay thế bằng khóa bí mật của bạn
+            const token = jwt.sign({ url: url }, secretKey, { expiresIn: '1h' }); // Tạo JWT
+            const redirectLink = `bina520.github.io/encodedUrl/redirect.html?token=${encodeURIComponent(token)}`; // Thay thế bằng URL của bạn
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+        }
+    </script>
+</body>
+</html>
