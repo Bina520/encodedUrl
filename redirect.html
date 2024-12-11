@@ -7,8 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Đang chuyển hướng...</h1>
-    <p id="countdown">Bạn sẽ được chuyển hướng sau <span id="timer">5</span> giây.</p>
+    <h1>Please Wait 5s</h1>
+    <p id="countdown">Please Wait ...  <span id="timer">5</span> giây.</p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -17,8 +17,9 @@
         const timerElement = document.getElementById('timer');
 
         if (encodedUrl) {
-            const decryptedBytes = CryptoJS.AES.decrypt(encodedUrl, secretKey);
-            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const decryptedBytes = CryptoJS.AES.decrypt(encodedUrl, secretKey);
+        const base64Url = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const decodedUrl = atob(base64Url); // Giải mã Base64
             let countdown = 5;
 
             const interval = setInterval(() => {
