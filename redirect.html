@@ -20,15 +20,20 @@
             const encrypted = atob(base64Url); // Giải mã Base64
             const decryptedBytes = CryptoJS.AES.decrypt(encrypted, secretKey);
             const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
-            let countdown = 5;
 
-            const interval = setInterval(() => {
-                timerElement.innerText = --countdown;
-                if (countdown <= 0) {
-                    clearInterval(interval);
-                    window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
-                }
-            }, 1000);
+            if (decodedUrl) {
+                let countdown = 5;
+
+                const interval = setInterval(() => {
+                    timerElement.innerText = --countdown;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
+                    }
+                }, 1000);
+            } else {
+                document.body.innerText = "Không thể giải mã URL.";
+            }
         } else {
             document.body.innerText = "Không có URL để chuyển hướng.";
         }
