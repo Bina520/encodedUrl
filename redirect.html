@@ -4,31 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirect Page</title>
+    <script>
+        const urlMap = new Map();
+
+        function decodeUrl(shortId) {
+            return urlMap.get(shortId);
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shortId = urlParams.get('url');
+            const timerElement = document.getElementById('timer');
+
+            if (shortId) {
+                const originalUrl = decodeUrl(shortId);
+                if (originalUrl) {
+                    let countdown = 3;
+
+                    const interval = setInterval(() => {
+                        timerElement.innerText = --countdown;
+                        if (countdown <= 0) {
+                            clearInterval(interval);
+                            window.location.href = originalUrl; 
+                        }
+                    }, 1000);
+                } else {
+                    document.body.innerText = "URL ERROR.";
+                }
+            } else {
+                document.body.innerText = "Not URL.";
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Please Wait 3s</h1>
     <p id="countdown">Please Wait ... <span id="timer">3</span> s.</p>
-
-    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const compressedUrl = urlParams.get('url');
-        const timerElement = document.getElementById('timer');
-
-        if (compressedUrl) {
-            const originalUrl = LZString.decompressFromEncodedURIComponent(compressedUrl); // Giải nén và giải mã URL
-            let countdown = 3;
-
-            const interval = setInterval(() => {
-                timerElement.innerText = --countdown;
-                if (countdown <= 0) {
-                    clearInterval(interval);
-                    window.location.href = originalUrl; 
-                }
-            }, 1000);
-        } else {
-            document.body.innerText = "Not URL.";
-        }
-    </script>
 </body>
 </html>
