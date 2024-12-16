@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL </title>
+    <title>Mã hóa URL</title>
     <script>
         function generateShortId(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -26,8 +26,20 @@
             urlMap[shortId] = url;
             localStorage.setItem('urlMap', JSON.stringify(urlMap));
 
-            const redirectLink = `${window.location.origin}/encodedUrl/redirect.html?url=${shortId}`;
+            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
+            const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+            document.getElementById('copyButton').style.display = 'inline-block';
+        }
+
+        function copyToClipboard() {
+            const encodedOutput = document.getElementById('encodedOutput').innerText;
+            const link = encodedOutput.replace('Liên kết đã mã hóa: ', '');
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Đã sao chép liên kết vào clipboard!');
+            }, () => {
+                alert('Không thể sao chép liên kết.');
+            });
         }
     </script>
 </head>
@@ -36,5 +48,6 @@
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <p id="encodedOutput"></p>
+    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Copy Link</button>
 </body>
 </html>
