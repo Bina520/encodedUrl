@@ -13,7 +13,7 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const encodedShortId = urlParams.get('url');
-            const shortId = atob(encodedShortId); // 
+            const shortId = atob(encodedShortId); 
             const timerElement = document.getElementById('timer');
 
             if (shortId) {
