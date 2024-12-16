@@ -6,18 +6,18 @@
     <title>Redirect Page</title>
 </head>
 <body>
-    <h1>Please Wait 5s</h1>
-    <p id="countdown">Please Wait ... <span id="timer">5</span> s.</p>
+    <h1>Please Wait 3s</h1>
+    <p id="countdown">Please Wait ... <span id="timer">3</span> s.</p>
 
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const base64Url = urlParams.get('url');
+        const compressedUrl = urlParams.get('url');
         const timerElement = document.getElementById('timer');
 
-        if (base64Url) {
-            const decodedUrlWithShortId = atob(base64Url); 
-            const originalUrl = decodedUrlWithShortId.slice(0, -10); // Loại bỏ mã ngắn dài 10 ký tự
-            let countdown = 5;
+        if (compressedUrl) {
+            const originalUrl = LZString.decompressFromEncodedURIComponent(compressedUrl); // Giải nén và giải mã URL
+            let countdown = 3;
 
             const interval = setInterval(() => {
                 timerElement.innerText = --countdown;
