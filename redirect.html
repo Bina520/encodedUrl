@@ -6,8 +6,8 @@
     <title>Redirect Page</title>
 </head>
 <body>
-    <h1>Please Wait 3s</h1>
-    <p id="countdown">Please Wait ... <span id="timer">3</span> s.</p>
+    <h1>Please Wait 5s</h1>
+    <p id="countdown">Please Wait ... <span id="timer">5</span> s.</p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -16,8 +16,8 @@
 
         if (base64Url) {
             const decodedUrlWithShortId = atob(base64Url); 
-            const originalUrl = decodedUrlWithShortId.slice(0, -9); // Loại bỏ mã ngắn dài 9 ký tự
-            let countdown = 3;
+            const originalUrl = decodedUrlWithShortId.slice(0, -10); // Loại bỏ mã ngắn dài 10 ký tự
+            let countdown = 5;
 
             const interval = setInterval(() => {
                 timerElement.innerText = --countdown;
