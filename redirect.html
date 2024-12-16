@@ -13,7 +13,7 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const encodedShortId = urlParams.get('url');
-            const shortId = atob(encodedShortId); // Giải mã shortId từ Base64
+            const shortId = atob(encodedShortId); 
             const timerElement = document.getElementById('timer');
 
             if (shortId) {
@@ -32,7 +32,7 @@
                     document.body.innerText = "URL ERR.";
                 }
             } else {
-                document.body.innerText = "Not URL.";
+                document.body.innerText = "NOT URL.";
             }
         }
     </script>
