@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL 1</title>
+    <title>Mã hóa URL</title>
     <script>
         function generateShortId(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -27,8 +27,10 @@
             localStorage.setItem('urlMap', JSON.stringify(urlMap));
 
             const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
-            const redirectLink = `${window.location.origin}/encodedUrl/index.html?url=${encodedShortId}`;
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+            const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
+            const encodedRedirectLink = btoa(redirectLink); // Mã hóa toàn bộ URL
+
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${window.location.origin}/decode.html?data=${encodedRedirectLink}`;
             document.getElementById('copyButton').style.display = 'inline-block';
         }
 
