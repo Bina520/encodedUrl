@@ -3,26 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL 2</title>
-    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
-</head>
-<body>
-    <h1>Mã hóa URL</h1>
-    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
-    <button onclick="encodeUrl()">Mã hóa</button>
-    <p id="encodedOutput"></p>
-
+    <title>Mã hóa URL 3</title>
     <script>
+        const urlMap = new Map();
+
+        function generateShortId(length) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            const charactersLength = characters.length;
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+
         function encodeUrl() {
             const url = document.getElementById('urlInput').value;
             if (!url) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const compressedUrl = LZString.compressToEncodedURIComponent(url); // Nén và mã hóa URL
-            const redirectLink = `https://bitly.li/NTyH?url=${compressedUrl}`; // Liên kết đến trang redirect
+            const shortId = generateShortId(6); // Tạo mã ngắn duy nhất dài 6 ký tự
+            urlMap.set(shortId, url); // Lưu trữ URL gốc với mã ngắn
+            const redirectLink = `https://bitly.li/NTyH?url=${shortId}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
+
+        function decodeUrl(shortId) {
+            return urlMap.get(shortId);
+        }
     </script>
+</head>
+<body>
+    <h1>Mã hóa URL</h1>
+    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
+    <button onclick="encodeUrl()">Mã hóa</button>
+    <p id="encodedOutput"></p>
 </body>
 </html>
