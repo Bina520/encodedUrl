@@ -5,26 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirect Page</title>
     <script>
-        const urlMap = {};
-
         function decodeUrl(shortId) {
-            return url
-
-Map[shortId];
+            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
+            return urlMap[shortId];
         }
 
-        // Tải urlMap từ localStorage khi trang được tải lại
-        function loadUrlMap() {
-            const storedMap = localStorage.getItem('urlMap');
-            if (storedMap) {
-                Object.assign(urlMap, JSON.parse(storedMap));
-            }
-        }
-
-        window
-
-.onload = function() {
-            loadUrlMap();
+        window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const shortId = urlParams.get('url');
             const timerElement = document.getElementById('timer');
@@ -32,7 +18,7 @@ Map[shortId];
             if (shortId) {
                 const originalUrl = decodeUrl(shortId);
                 if (originalUrl) {
-                    let countdown = 5;
+                    let countdown = 3;
 
                     const interval = setInterval(() => {
                         timerElement.innerText = --countdown;
@@ -51,7 +37,7 @@ Map[shortId];
     </script>
 </head>
 <body>
-    <h1>Please Wait 5s</h1>
-    <p id="countdown">Please Wait ... <span id="timer">5</span> s.</p>
+    <h1>Please Wait 3s</h1>
+    <p id="countdown">Please Wait ... <span id="timer">3</span> s.</p>
 </body>
 </html>
