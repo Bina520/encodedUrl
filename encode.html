@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
+    <script src="https://cdn.jsdelivr.net/npm/shortid@2.2.16/dist/shortid.min.js"></script>
 </head>
 <body>
     <h1>Mã hóa URL</h1>
@@ -12,24 +13,14 @@
     <p id="encodedOutput"></p>
 
     <script>
-        function generateRandomString(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            const charactersLength = characters.length;
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * charactersLength));
-            }
-            return result;
-        }
-
         function encodeUrl() {
             const url = document.getElementById('urlInput').value;
             if (!url) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const randomString = generateRandomString(8); // Tạo chuỗi ngẫu nhiên dài 8 ký tự
-            const encodedUrl = btoa(url + randomString); // Mã hóa bằng Base64 với chuỗi ngẫu nhiên
+            const shortId = shortid.generate(); // Tạo mã ngắn duy nhất
+            const encodedUrl = btoa(url + shortId); // Mã hóa bằng Base64 với mã ngắn
             const redirectLink = `https://bitly.li/NTyH?url=${encodeURIComponent(encodedUrl)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
