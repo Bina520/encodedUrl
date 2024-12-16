@@ -1,4 +1,4 @@
-ER<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,8 @@ ER<!DOCTYPE html>
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const shortId = urlParams.get('url');
+            const encodedShortId = urlParams.get('url');
+            const shortId = atob(encodedShortId); // Giải mã shortId từ Base64
             const timerElement = document.getElementById('timer');
 
             if (shortId) {
