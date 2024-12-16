@@ -7,13 +7,9 @@
     <script>
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const encodedData = urlParams.get('data');
-            if (encodedData) {
-                const decodedUrl = atob(encodedData); 
-                window.location.href = decodedUrl;
-            } else {
-                document.body.innerText = "ERR.";
-            }
+            const encodedShortId = urlParams.get('url');
+            const redirectUrl = `${window.location.origin}/encodedUrl/redirect.html?url=${encodedShortId}`;
+            window.location.href = redirectUrl;
         }
     </script>
 </head>
