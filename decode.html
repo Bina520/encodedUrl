@@ -7,9 +7,13 @@
     <script>
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const encodedShortId = urlParams.get('url');
-            const redirectUrl = `${window.location.origin}/encodedUrl/redirect.html?url=${encodedShortId}`;
-            window.location.href = redirectUrl;
+            const encodedData = urlParams.get('data');
+            if (encodedData) {
+                const decodedUrl = atob(encodedData); // Giải mã toàn bộ URL
+                window.location.href = decodedUrl;
+            } else {
+                document.body.innerText = "Không có dữ liệu để giải mã.";
+            }
         }
     </script>
 </head>
