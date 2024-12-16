@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL</title>
+    <title>Mã hóa URL 1</title>
     <script>
-        const urlMap = {};
-
         function generateShortId(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
-            const charactersLength = characters.length;
             for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
             }
             return result;
         }
@@ -23,39 +20,15 @@
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const shortId = generate
 
-ShortId(6); // Tạo mã ngắn duy nhất dài 6 ký tự
-            urlMap[shortId] = url; // Lưu trữ URL gốc với mã ngắn
-            const redirectLink = `https://bitly.li/NTyH?url=${short
+            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
+            const shortId = generateShortId(6);
+            urlMap[shortId] = url;
+            localStorage.setItem('urlMap', JSON.stringify(urlMap));
 
-Id}`; // Liên kết đến trang redirect
+            const redirectLink = `${window.location.origin}/redirect.html?url=${shortId}`;
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
-
-        function decodeUrl(shortId) {
-            return urlMap[shortId];
-        }
-
-        //
-
- Lưu trữ urlMap vào localStorage để có thể truy cập từ trang giải mã
-        function saveUrlMap() {
-            localStorage.setItem('urlMap', JSON.stringify(urlMap));
-        }
-
-        // Tải urlMap từ localStorage khi trang được tải lại
-        function loadUrlMap() {
-            const storedMap = localStorage.getItem('urlMap');
-            if (storedMap) {
-                Object
-
-.assign(urlMap, JSON.parse(storedMap));
-            }
-        }
-
-        window.onload = loadUrlMap;
-        window.onbeforeunload = saveUrlMap;
     </script>
 </head>
 <body>
