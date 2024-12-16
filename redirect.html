@@ -6,8 +6,8 @@
     <title>Redirect Page</title>
 </head>
 <body>
-    <h1>Please Wait 5s</h1>
-    <p id="countdown">Please Wait ... <span id="timer">5</span> s.</p>
+    <h1>Please Wait 3s</h1>
+    <p id="countdown">Please Wait ... <span id="timer">3</span> s.</p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -15,14 +15,15 @@
         const timerElement = document.getElementById('timer');
 
         if (base64Url) {
-            const decodedUrl = atob(base64Url); 
-            let countdown = 5;
+            const decodedUrlWithRandom = atob(base64Url); 
+            const originalUrl = decodedUrlWithRandom.slice(0, -8); // Loại bỏ chuỗi ngẫu nhiên dài 8 ký tự
+            let countdown = 3;
 
             const interval = setInterval(() => {
                 timerElement.innerText = --countdown;
                 if (countdown <= 0) {
                     clearInterval(interval);
-                    window.location.href = decodedUrl; 
+                    window.location.href = originalUrl; 
                 }
             }, 1000);
         } else {
