@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL 1</title>
+    <title>Mã hóa URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         function generateShortId(length) {
@@ -42,24 +42,36 @@
 
             localStorage.setItem('urlMap', JSON.stringify(urlMap)); // Lưu vào localStorage
 
-            const redirectLink = `${window.location.origin}/encodedUrl/redirect.html?shortId=${btoa(shortId)}`; // Mã hóa mã ngắn bằng Base64
+            const redirectLink = `${window.location.origin}/redirect.html?shortId=${btoa(shortId)}`; // Mã hóa mã ngắn bằng Base64
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
             document.getElementById('copyButton').style.display = 'inline-block';
 
-            // Tạo file TXT để lưu trữ mã hóa
-            createTextFile(shortId, encryptedUrl);
+            // Gửi dữ liệu đến JSONBin.io để lưu vào file
+            saveUrlToJsonBin(shortId, encryptedUrl);
         }
 
-        function createTextFile(shortId, encryptedUrl) {
-            const data = `Mã ngắn: ${shortId}\nURL đã mã hóa: ${encryptedUrl}\n`;
-            const blob = new Blob([data], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'url_storage.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+        function saveUrlToJsonBin(shortId, encryptedUrl) {
+            const apiKey = '$2a$10$hOv/AkHoAv/Ket2jDglStOSO146TRI5GmWuenlAok/K7iTBQe.N.S'; // Thay thế bằng API key của bạn
+            const data = {
+                shortId: shortId,
+                encryptedUrl: encryptedUrl
+            };
+
+            fetch('https://api.jsonbin.io/v3/b', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey,
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dữ liệu đã được lưu tại:', data);
+            })
+            .catch((error) => {
+                console.error('Lỗi:', error);
+            });
         }
 
         function copyToClipboard() {
