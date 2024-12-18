@@ -8,7 +8,7 @@
     <script>
         function redirectToUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            const encodedShortId = urlParams.get('url'); // Lấy mã ngắn đã mã hóa
+            const encodedShortId = urlParams.get('shortId'); // Lấy mã ngắn đã mã hóa
             if (!encodedShortId) {
                 document.body.innerText = "Không có mã ngắn để giải mã.";
                 return;
@@ -19,7 +19,7 @@
             const encryptedUrl = urlMap[shortId]; // Lấy URL đã mã hóa từ mã ngắn
 
             if (encryptedUrl) {
-                const secretKey = '123'; // Khóa bí mật
+                const secretKey = 'my-secret-key'; // Khóa bí mật
                 const decryptedBytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey); // Giải mã URL
                 const originalUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
 
