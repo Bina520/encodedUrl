@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         function redirectToUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -15,10 +16,18 @@
 
             const shortId = atob(encodedShortId); // Giải mã Base64
             const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
-            const originalUrl = urlMap[shortId]; // Lấy URL gốc từ mã ngắn
+            const encryptedUrl = urlMap[shortId]; // Lấy URL đã mã hóa từ mã ngắn
 
-            if (originalUrl) {
-                window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+            if (encryptedUrl) {
+                const secretKey = 'my-secret-key'; // Khóa bí mật
+                const decryptedBytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey); // Giải mã URL
+                const originalUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
+
+                if (originalUrl) {
+                    window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+                } else {
+                    document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
+                }
             } else {
                 document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
             }
