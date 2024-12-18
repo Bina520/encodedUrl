@@ -4,50 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Mã hóa URL</h1>
+    <h1>Mã hóa URL 1</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
-    <button onclick="encodeUrl()">Mã hóa</button>
-    <button onclick="copyLink()">Sao chép liên kết</button>
+    <button id="encodeButton">Mã hóa</button>
+    <button id="copyButton">Sao chép liên kết</button>
     <p id="encodedOutput"></p>
 
     <script>
-        function generateRandomKey(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
         function encodeUrl() {
-            const url = document.getElementById('urlInput').value;
+            const url = $('#urlInput').val();
             if (!url) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const secretKey = generateRandomKey(12); // Tạo khóa bí mật ngẫu nhiên mỗi lần mã hóa
+            const secretKey = '123'; // Khóa bí mật cố định
             const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
             const base64Url = btoa(encrypted); // Mã hóa Base64
 
-            // Rút gọn chuỗi mã hóa
-            const shortUrl = base64Url.substring(0, 12); // Lấy 12 ký tự đầu tiên
-            const redirectLink = `bitly.li/NTyH?url=${encodeURIComponent(shortUrl)}&key=${encodeURIComponent(secretKey)}`; // Liên kết đến trang redirect
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+            const redirectLink = `https://bitly.li/NTyH?url=${encodeURIComponent(base64Url)}`; // Liên kết đến trang redirect
+            $('#encodedOutput').text(`Liên kết đã mã hóa: ${redirectLink}`);
         }
 
-        function copyLink() {
-            const outputText = document.getElementById('encodedOutput').innerText;
-            const link = outputText.replace('Liên kết đã mã hóa: ', ''); // Lấy chỉ phần liên kết
-            navigator.clipboard.writeText(link).then(() => {
-                alert("Liên kết đã được sao chép vào clipboard!");
-            }, (err) => {
-                alert("Không thể sao chép liên kết: ", err);
+        $(document).ready(function() {
+            $('#encodeButton').click(encodeUrl);
+
+            $('#copyButton').click(function() {
+                const outputText = $('#encodedOutput').text();
+                const link = outputText.replace('Liên kết đã mã hóa: ', ''); // Lấy chỉ phần liên kết
+                navigator.clipboard.writeText(link).then(() => {
+                    alert("Liên kết đã được sao chép vào clipboard!");
+                }, (err) => {
+                    alert("Không thể sao chép liên kết: ", err);
+                });
             });
-        }
+        });
     </script>
 </body>
 </html>
