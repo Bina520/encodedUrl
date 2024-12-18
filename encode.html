@@ -29,13 +29,13 @@
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const secretKey = '@'; // Thay thế bằng khóa bí mật của bạn
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
             const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
             const base64Url = btoa(encrypted); // Mã hóa Base64
 
             // Rút gọn chuỗi mã hóa và thêm hậu tố ngẫu nhiên
             const shortUrl = base64Url.substring(0, 5) + generateRandomSuffix(5); // Lấy 5 ký tự đầu tiên và thêm 5 ký tự ngẫu nhiên
-            const redirectLink = `https://bitly.li/NTyH?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
+            const redirectLink = `redirect.html?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
 
