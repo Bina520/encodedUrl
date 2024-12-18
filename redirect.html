@@ -16,7 +16,7 @@
         const timerElement = document.getElementById('timer');
 
         if (base64Url) {
-            const decryptedBytes = CryptoJS.AES.decrypt(atob(base64Url), 'my-secret-key'); // Giải mã bằng khóa cố định
+            const decryptedBytes = CryptoJS.AES.decrypt(atob(base64Url), '123'); // Giải mã bằng khóa cố định
             const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
 
             if (decodedUrl) {
