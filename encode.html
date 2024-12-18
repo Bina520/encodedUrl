@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Encoder/Decoder</title>
+    <title>Link Encoder</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,7 +28,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Link Encoder/Decoder</h2>
+        <h2>Link Encoder</h2>
         <input type="text" id="linkInput" placeholder="Enter your link here">
         <button onclick="encodeLink()">Encode Link</button>
         <p id="result"></p>
@@ -43,8 +43,8 @@
                 return;
             }
 
-            const encodedLink = btoa(xorEncrypt(linkInput, secretKey));
-            const encodedURL = `${window.location.origin}${window.location.pathname}?link=${encodedLink}`;
+            const encodedLink = btoa(xorEncrypt(linkInput, secretKey)).substring(0, 12);
+            const encodedURL = `${window.location.origin}/decode.html?link=${encodedLink}`;
             document.getElementById('result').innerText = `Encoded Link: ${encodedURL}`;
         }
 
@@ -55,26 +55,6 @@
             }
             return result;
         }
-
-        function decodeLink(encodedLink) {
-            try {
-                const decodedLink = xorEncrypt(atob(encodedLink), secretKey);
-                window.location.href = decodedLink;
-            } catch (e) {
-                document.getElementById('result').innerText = 'Error: Invalid encoded link';
-            }
-        }
-
-        function checkForEncodedLink() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedLink = urlParams.get('link');
-            if (encodedLink) {
-                decodeLink(encodedLink);
-            }
-        }
-
-        // Kiểm tra xem có liên kết đã mã hóa trong URL không khi tải trang
-        checkForEncodedLink();
     </script>
 </body>
 </html>
