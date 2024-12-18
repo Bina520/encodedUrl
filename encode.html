@@ -1,54 +1,80 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>Link Encoder/Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <h1>Mã hóa URL</h1>
-    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
-    <button onclick="encodeUrl()">Mã hóa</button>
-    <button onclick="copyLink()">Sao chép liên kết</button>
-    <p id="encodedOutput"></p>
-
+    <div class="container">
+        <h2>Link Encoder/Decoder</h2>
+        <input type="text" id="linkInput" placeholder="Enter your link here">
+        <button onclick="encodeLink()">Encode Link</button>
+        <p id="result"></p>
+    </div>
     <script>
-        function generateRandomSuffix(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const secretKey = '123'; // Khóa bí mật để mã hóa và giải mã
+
+        function encodeLink() {
+            const linkInput = document.getElementById('linkInput').value;
+            if (!linkInput) {
+                alert('Please enter a link');
+                return;
+            }
+
+            const encodedLink = btoa(xorEncrypt(linkInput, secretKey));
+            const encodedURL = `${window.location.origin}${window.location.pathname}?link=${encodedLink}`;
+            document.getElementById('result').innerText = `Encoded Link: ${encodedURL}`;
+        }
+
+        function xorEncrypt(text, key) {
             let result = '';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
             }
             return result;
         }
 
-        function encodeUrl() {
-            const url = document.getElementById('urlInput').value;
-            if (!url) {
-                alert("Vui lòng nhập một URL hợp lệ.");
-                return;
+        function decodeLink(encodedLink) {
+            try {
+                const decodedLink = xorEncrypt(atob(encodedLink), secretKey);
+                window.location.href = decodedLink;
+            } catch (e) {
+                document.getElementById('result').innerText = 'Error: Invalid encoded link';
             }
-
-            // Mã hóa URL bằng Base64
-            const encodedUrl = btoa(url);
-            // Rút ngắn mã hóa xuống 10 ký tự
-            const shortUrl = encodedUrl.substring(0, 10);
-            const randomSuffix = generateRandomSuffix(5); // Tạo 5 ký tự ngẫu nhiên
-            const finalUrl = shortUrl + randomSuffix; // Kết hợp mã đã mã hóa và ký tự ngẫu nhiên
-            const redirectLink = `bitly.li/NTyH?url=${encodeURIComponent(finalUrl)}`; // Liên kết đến trang redirect
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
 
-        function copyLink() {
-            const outputText = document.getElementById('encodedOutput').innerText;
-            const link = outputText.replace('Liên kết đã mã hóa: ', ''); // Lấy chỉ phần liên kết
-            navigator.clipboard.writeText(link).then(() => {
-                alert("Liên kết đã được sao chép vào clipboard!");
-            }, (err) => {
-                alert("Không thể sao chép liên kết: ", err);
-            });
+        function checkForEncodedLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedLink = urlParams.get('link');
+            if (encodedLink) {
+                decodeLink(encodedLink);
+            }
         }
+
+        // Kiểm tra xem có liên kết đã mã hóa trong URL không khi tải trang
+        checkForEncodedLink();
     </script>
 </body>
 </html>
