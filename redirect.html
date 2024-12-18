@@ -28,11 +28,10 @@
                 return;
             }
 
-            const base64Url = shortUrl.substring(0, 5); // Lấy 5 ký tự đầu tiên
             const secretKey = '@'; // Thay thế bằng khóa bí mật của bạn
+            const base64Url = shortUrl.substring(0, 5) + '=='; // Thêm padding cho Base64
+            const decrypted = CryptoJS.AES.decrypt(atob(base64Url), secretKey).toString(CryptoJS.enc.Utf8);
 
-            // Giải mã
-            const decrypted = CryptoJS.AES.decrypt(atob(base64Url + '=='), secretKey).toString(CryptoJS.enc.Utf8);
             if (decrypted) {
                 document.getElementById('originalUrl').innerText = `URL gốc: ${decrypted}`;
                 startCountdown(decrypted); // Bắt đầu đếm ngược với URL gốc
