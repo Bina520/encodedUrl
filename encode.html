@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.0.0/jsencrypt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Mã hóa URL </h1>
+    <h1>Mã hóa URL</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <button onclick="copyLink()">Sao chép liên kết</button>
     <p id="encodedOutput"></p>
 
     <script>
-        const publicKey = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkuQ8dmv0c1rmuUHJfBJbWGiRAaImV8/G3Pleet6RcA8ETD51fFb4bPFvAj7aZETXmrqmYu3ZRrnnV6KiGsONUCmBk7MFu3R8Mg44a2t0L1wWfe5uZvTvHJSrvx0qgTapNON7vXlhxAIVFfNk4M5ZZxD9Po1EX/KFRnSCZ+wO+DYBNuHSbUikForRPnwfdhNZ81Ni1sHhaQ73JNV+GG4JPQNeJLXV/aVbl/l0y5yJ/aO5yL6rpp3uUSOr0L1SbneMS9Zwn1AVtTLcfTQkBQ/25KxAbalvzvI88J0qvp6pAOY8N2ThthoyYH5wzaSM9Ta9qhgFxuSLOW/rO2z3nEmgwIDAQAB
------END PUBLIC KEY-----`;
-
         function generateRandomSuffix(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
@@ -34,12 +30,12 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkuQ8dmv0c1rmuUHJfBJbWGiRAaImV8/G3Pl
                 return;
             }
 
-            const encryptor = new JSEncrypt();
-            encryptor.setPublicKey(publicKey);
-            const encrypted = encryptor.encrypt(url); // Mã hóa bằng RSA
-
+            // Mã hóa URL bằng Base64
+            const encodedUrl = btoa(url);
+            // Rút ngắn mã hóa xuống 10 ký tự
+            const shortUrl = encodedUrl.substring(0, 10);
             const randomSuffix = generateRandomSuffix(5); // Tạo 5 ký tự ngẫu nhiên
-            const finalUrl = encrypted + randomSuffix; // Kết hợp mã đã mã hóa và ký tự ngẫu nhiên
+            const finalUrl = shortUrl + randomSuffix; // Kết hợp mã đã mã hóa và ký tự ngẫu nhiên
             const redirectLink = `bitly.li/NTyH?url=${encodeURIComponent(finalUrl)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
