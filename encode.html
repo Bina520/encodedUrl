@@ -7,14 +7,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Mã hóa URL 1</h1>
+    <h1>Mã hóa URL</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <button onclick="copyLink()">Sao chép liên kết</button>
     <p id="encodedOutput"></p>
 
     <script>
-        function generateRandomSuffix(length) {
+        function generateRandomKey(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
             for (let i = 0; i < length; i++) {
@@ -29,13 +29,13 @@
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const secretKey = '@1'; // Thay thế bằng khóa bí mật của bạn
+            const secretKey = generateRandomKey(12); // Tạo khóa bí mật ngẫu nhiên mỗi lần mã hóa
             const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
             const base64Url = btoa(encrypted); // Mã hóa Base64
 
-            // Rút gọn chuỗi mã hóa và thêm hậu tố ngẫu nhiên
-            const shortUrl = base64Url.substring(0, 10) + generateRandomSuffix(4); // Lấy 12 ký tự đầu tiên và thêm 4 ký tự ngẫu nhiên
-            const redirectLink = `https://bitly.li/NTyH?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
+            // Rút gọn chuỗi mã hóa
+            const shortUrl = base64Url.substring(0, 12); // Lấy 12 ký tự đầu tiên
+            const redirectLink = `bitly.li/NTyH?url=${encodeURIComponent(shortUrl)}&key=${encodeURIComponent(secretKey)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
 
