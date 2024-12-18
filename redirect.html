@@ -29,7 +29,7 @@
             }
 
             const base64Url = shortUrl.substring(0, 5); // Lấy 5 ký tự đầu tiên
-            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
+            const secretKey = '@'; // Thay thế bằng khóa bí mật của bạn
 
             // Giải mã
             const decrypted = CryptoJS.AES.decrypt(atob(base64Url + '=='), secretKey).toString(CryptoJS.enc.Utf8);
