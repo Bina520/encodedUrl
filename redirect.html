@@ -3,38 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirect Page</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>Giải mã URL</title>
+    <script>
+        function redirectToUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedShortId = urlParams.get('url'); // Lấy mã ngắn đã mã hóa
+            if (!encodedShortId) {
+                document.body.innerText = "Không có mã ngắn để giải mã.";
+                return;
+            }
+
+            const shortId = atob(encodedShortId); // Giải mã Base64
+            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
+            const originalUrl = urlMap[shortId]; // Lấy URL gốc từ mã ngắn
+
+            if (originalUrl) {
+                window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+            } else {
+                document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
+            }
+        }
+
+        window.onload = redirectToUrl; // Gọi hàm khi trang được tải
+    </script>
 </head>
 <body>
     <h1>Đang chuyển hướng...</h1>
-    <p id="countdown">Bạn sẽ được chuyển hướng sau <span id="timer">5</span> giây.</p>
-
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const base64Url = urlParams.get('url'); // Lấy URL đã mã hóa
-        const timerElement = document.getElementById('timer');
-
-        if (base64Url) {
-            const decryptedBytes = CryptoJS.AES.decrypt(atob(base64Url), 'my-secret-key'); // Giải mã bằng khóa cố định
-            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
-
-            if (decodedUrl) {
-                let countdown = 5;
-
-                const interval = setInterval(() => {
-                    timerElement.innerText = --countdown;
-                    if (countdown <= 0) {
-                        clearInterval(interval);
-                        window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
-                    }
-                }, 1000);
-            } else {
-                document.body.innerText = "Không thể giải mã URL.";
-            }
-        } else {
-            document.body.innerText = "Không có URL để chuyển hướng.";
-        }
-    </script>
+    <p id="status">Đang tìm URL gốc...</p>
 </body>
 </html>
