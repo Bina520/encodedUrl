@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <h1>Mã hóa URL</h1>
+    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
+    <button onclick="encodeUrl()">Mã hóa</button>
+    <button onclick="copyLink()">Sao chép liên kết</button>
+    <p id="encodedOutput"></p>
+
     <script>
-        function generateShortId(length) {
+        function generateRandomSuffix(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
             for (let i = 0; i < length; i++) {
@@ -15,81 +23,31 @@
             return result;
         }
 
-        function isValidUrl(url) {
-            const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-                '((([a-z\\d]([a-z\\d-]*[a-z\\d])?)\\.)+[a-z]{2,}|' + // domain name
-                'localhost|' + // localhost
-                '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' + // IP address
-                '\\[?[a-fA-F0-9]*:[a-fA-F0-9:]+\\]?)' + // IPv6
-                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-            return !!pattern.test(url);
-        }
-
         function encodeUrl() {
             const url = document.getElementById('urlInput').value;
-            if (!url || !isValidUrl(url)) {
+            if (!url) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
+            const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
+            const base64Url = btoa(encrypted); // Mã hóa Base64
 
-            const shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
-            const secretKey = '@1'; // Khóa bí mật
-            const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
-            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
-            urlMap[shortId] = encryptedUrl; // Lưu trữ URL đã mã hóa
-
-            localStorage.setItem('urlMap', JSON.stringify(urlMap)); // Lưu vào localStorage
-
-            const redirectLink = `${window.location.origin}/redirect.html?shortId=${btoa(shortId)}`; // Mã hóa mã ngắn bằng Base64
+            // Rút gọn chuỗi mã hóa và thêm hậu tố ngẫu nhiên
+            const shortUrl = base64Url.substring(0, 5) + generateRandomSuffix(5); // Lấy 5 ký tự đầu tiên và thêm 5 ký tự ngẫu nhiên
+            const redirectLink = `redirect.html?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
-            document.getElementById('copyButton').style.display = 'inline-block';
-
-            // Gửi dữ liệu đến JSONBin.io để lưu vào file
-            saveUrlToJsonBin(shortId, encryptedUrl);
         }
 
-        function saveUrlToJsonBin(shortId, encryptedUrl) {
-            const apiKey = '$2a$10$hOv/AkHoAv/Ket2jDglStOSO146TRI5GmWuenlAok/K7iTBQe.N.S'; // Thay thế bằng API key của bạn
-            const data = {
-                shortId: shortId,
-                encryptedUrl: encryptedUrl
-            };
-
-            fetch('https://api.jsonbin.io/v3/b', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey,
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Dữ liệu đã được lưu tại:', data);
-            })
-            .catch((error) => {
-                console.error('Lỗi:', error);
-            });
-        }
-
-        function copyToClipboard() {
-            const encodedOutput = document.getElementById('encodedOutput').innerText;
-            const link = encodedOutput.replace('Liên kết đã mã hóa: ', '');
+        function copyLink() {
+            const outputText = document.getElementById('encodedOutput').innerText;
+            const link = outputText.replace('Liên kết đã mã hóa: ', ''); // Lấy chỉ phần liên kết
             navigator.clipboard.writeText(link).then(() => {
-                alert('Đã sao chép liên kết vào clipboard!');
-            }, () => {
-                alert('Không thể sao chép liên kết.');
+                alert("Liên kết đã được sao chép vào clipboard!");
+            }, (err) => {
+                alert("Không thể sao chép liên kết: ", err);
             });
         }
     </script>
-</head>
-<body>
-    <h1>Mã hóa URL</h1>
-    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
-    <button onclick="encodeUrl()">Mã hóa</button>
-    <p id="encodedOutput"></p>
-    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Sao chép liên kết</button>
 </body>
 </html>
