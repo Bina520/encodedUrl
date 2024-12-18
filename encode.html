@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL</title>
+    <title>Mã hóa URL 1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
         function generateShortId(length) {
@@ -34,22 +34,32 @@
                 return;
             }
 
-            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
-            let shortId;
-            do {
-                shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
-            } while (urlMap[shortId]); // Kiểm tra trùng lặp
-
-            // Mã hóa URL bằng AES
-            const secretKey = '123'; // Khóa bí mật
+            const shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
+            const secretKey = '@1'; // Khóa bí mật
             const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
+            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
             urlMap[shortId] = encryptedUrl; // Lưu trữ URL đã mã hóa
-            localStorage.setItem('urlMap', JSON.stringify(urlMap));
 
-            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
-            const redirectLink = `https://bitly.li/NTyH?url=${encodedShortId}`;
+            localStorage.setItem('urlMap', JSON.stringify(urlMap)); // Lưu vào localStorage
+
+            const redirectLink = `${window.location.origin}/encodedUrl/redirect.html?shortId=${btoa(shortId)}`; // Mã hóa mã ngắn bằng Base64
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
             document.getElementById('copyButton').style.display = 'inline-block';
+
+            // Tạo file TXT để lưu trữ mã hóa
+            createTextFile(shortId, encryptedUrl);
+        }
+
+        function createTextFile(shortId, encryptedUrl) {
+            const data = `Mã ngắn: ${shortId}\nURL đã mã hóa: ${encryptedUrl}\n`;
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'url_storage.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         function copyToClipboard() {
