@@ -29,7 +29,7 @@
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
+            const secretKey = '@'; // Thay thế bằng khóa bí mật của bạn
             const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
             const base64Url = btoa(encrypted); // Mã hóa Base64
 
