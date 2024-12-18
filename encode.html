@@ -7,14 +7,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.0.0/jsencrypt.min.js"></script>
 </head>
 <body>
-    <h1>Mã hóa URL 1</h1>
+    <h1>Mã hóa URL </h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <button onclick="copyLink()">Sao chép liên kết</button>
     <p id="encodedOutput"></p>
 
     <script>
-        const publicKey = `1`;
+        const publicKey = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkuQ8dmv0c1rmuUHJfBJbWGiRAaImV8/G3Pleet6RcA8ETD51fFb4bPFvAj7aZETXmrqmYu3ZRrnnV6KiGsONUCmBk7MFu3R8Mg44a2t0L1wWfe5uZvTvHJSrvx0qgTapNON7vXlhxAIVFfNk4M5ZZxD9Po1EX/KFRnSCZ+wO+DYBNuHSbUikForRPnwfdhNZ81Ni1sHhaQ73JNV+GG4JPQNeJLXV/aVbl/l0y5yJ/aO5yL6rpp3uUSOr0L1SbneMS9Zwn1AVtTLcfTQkBQ/25KxAbalvzvI88J0qvp6pAOY8N2ThthoyYH5wzaSM9Ta9qhgFxuSLOW/rO2z3nEmgwIDAQAB
+-----END PUBLIC KEY-----`;
 
         function generateRandomSuffix(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
