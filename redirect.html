@@ -8,7 +8,7 @@
     <style>
         #adFrame {
             width: 100%;
-            height: 300px; /* Chiều cao của iframe */
+            height: 420px; /* Chiều cao của iframe */
             border: none;
         }
     </style>
@@ -22,13 +22,14 @@
     <script>
         function decodeUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            const shortUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
-            if (!shortUrl) {
+            const finalUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
+            if (!finalUrl) {
                 document.getElementById('originalUrl').innerText = "Không có mã để giải mã.";
                 return;
             }
 
-            const secretKey = '123'; // Thay thế bằng khóa bí mật của bạn
+            const shortUrl = finalUrl.substring(0, 5); // Lấy 5 ký tự đầu tiên
+            const secretKey = '1'; // Thay thế bằng khóa bí mật của bạn
             const decrypted = CryptoJS.AES.decrypt(atob(shortUrl), secretKey).toString(CryptoJS.enc.Utf8);
 
             if (decrypted) {
