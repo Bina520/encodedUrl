@@ -7,16 +7,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.0.0/jsencrypt.min.js"></script>
 </head>
 <body>
-    <h1>Mã hóa URL</h1>
+    <h1>Mã hóa URL 1</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <button onclick="copyLink()">Sao chép liên kết</button>
     <p id="encodedOutput"></p>
 
     <script>
-        const publicKey = `-----BEGIN PUBLIC KEY-----
-        123
-        -----END PUBLIC KEY-----`;
+        const publicKey = `1`;
 
         function generateRandomSuffix(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
