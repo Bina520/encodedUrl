@@ -17,20 +17,19 @@
     <h1>Giải mã URL</h1>
     <p id="originalUrl"></p>
     <p id="countdown"></p>
-    <iframe id="adFrame" src="https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" style="display:none;"></iframe> <!-- Thay thế bằng liên kết quảng cáo của bạn -->
+    <iframe id="adFrame" src="https://your-ad-link.com" style="display:none;"></iframe> <!-- Thay thế bằng liên kết quảng cáo của bạn -->
 
     <script>
         function decodeUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            const shortUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
-            if (!shortUrl) {
+            const encryptedUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
+            if (!encryptedUrl) {
                 document.getElementById('originalUrl').innerText = "Không có mã để giải mã.";
                 return;
             }
 
-            const secretKey = '@'; // Thay thế bằng khóa bí mật của bạn
-            const base64Url = shortUrl.substring(0, 5) + '=='; // Thêm padding cho Base64
-            const decrypted = CryptoJS.AES.decrypt(atob(base64Url), secretKey).toString(CryptoJS.enc.Utf8);
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
+            const decrypted = CryptoJS.AES.decrypt(encryptedUrl, secretKey).toString(CryptoJS.enc.Utf8);
 
             if (decrypted) {
                 document.getElementById('originalUrl').innerText = `URL gốc: ${decrypted}`;
