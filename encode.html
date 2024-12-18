@@ -4,50 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
-    <script>
-        function generateShortId(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
-        function encodeUrl() {
-            const url = document.getElementById('urlInput').value;
-            if (!url) {
-                alert("Vui lòng nhập một URL hợp lệ.");
-                return;
-            }
-
-            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
-            const shortId = generateShortId(6);
-            urlMap[shortId] = url;
-            localStorage.setItem('urlMap', JSON.stringify(urlMap));
-
-            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
-            const redirectLink = `${window.location.origin}/encodedUrl/decode.html?url=${encodedShortId}`;
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
-            document.getElementById('copyButton').style.display = 'inline-block';
-        }
-
-        function copyToClipboard() {
-            const encodedOutput = document.getElementById('encodedOutput').innerText;
-            const link = encodedOutput.replace('Liên kết đã mã hóa: ', '');
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Đã sao chép liên kết vào clipboard!');
-            }, () => {
-                alert('Không thể sao chép liên kết.');
-            });
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
     <h1>Mã hóa URL</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <p id="encodedOutput"></p>
-    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Copy Link</button>
+
+    <script>
+        function encodeUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert("Vui lòng nhập một URL hợp lệ.");
+                return;
+            }
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
+            const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
+            const base64Url = btoa(encrypted); // Mã hóa Base64
+            const redirectLink = `redirect.html?url=${encodeURIComponent(base64Url)}`; // Liên kết đến trang redirect
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+        }
+    </script>
 </body>
 </html>
