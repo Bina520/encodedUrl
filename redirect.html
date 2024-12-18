@@ -12,13 +12,13 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const base64Url = urlParams.get('url');
+        const shortUrl = urlParams.get('url');
         const timerElement = document.getElementById('timer');
 
-        if (base64Url) {
-            const encrypted = atob(base64Url); // Giải mã Base64
+        if (shortUrl) {
+            const base64Url = shortUrl + "=="; // Thêm padding cho Base64
             const secretKey = '123'; // Thay thế bằng khóa bí mật của bạn
-            const decryptedBytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+            const decryptedBytes = CryptoJS.AES.decrypt(atob(base64Url), secretKey);
             const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
 
             if (decodedUrl) {
