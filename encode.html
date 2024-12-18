@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Mã hóa URL 2</h1>
+    <h1>Mã hóa URL</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button id="encodeButton">Mã hóa</button>
     <button id="copyButton">Sao chép liên kết</button>
@@ -34,7 +34,8 @@
             const encrypted = CryptoJS.AES.encrypt(url, randomKey).toString(); // Mã hóa bằng AES với mã ngẫu nhiên
             const base64Url = btoa(encrypted); // Mã hóa Base64
 
-            const redirectLink = `redirect.html?url=${encodeURIComponent(base64Url)}&key=${encodeURIComponent(randomKey)}`; // Liên kết đến trang redirect
+            const shortUrl = base64Url.substring(0, 10); // Rút gọn chuỗi mã hóa xuống 10 ký tự
+            const redirectLink = `bitly.li/NTyH?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
             $('#encodedOutput').text(`Liên kết đã mã hóa: ${redirectLink}`);
         }
 
