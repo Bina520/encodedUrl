@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        p {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Link Decoder</h2>
+        <p id="result"></p>
+    </div>
+    <script>
+        const secretKey = '123'; // Khóa bí mật để mã hóa và giải mã
+
+        function decodeLink(encodedLink) {
+            try {
+                const decodedLink = xorEncrypt(atob(encodedLink), secretKey);
+                window.location.href = decodedLink;
+            } catch (e) {
+                document.getElementById('result').innerText = 'Error: Invalid encoded link';
+            }
+        }
+
+        function xorEncrypt(text, key) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        }
+
+        function checkForEncodedLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedLink = urlParams.get('link');
+            if (encodedLink) {
+                decodeLink(encodedLink);
+            }
+        }
+
+        // Kiểm tra xem có liên kết đã mã hóa trong URL không khi tải trang
+        checkForEncodedLink();
+    </script>
+</body>
+</html>
