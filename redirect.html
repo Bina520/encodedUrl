@@ -7,8 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Đang chuyển hướng...</h1>
-    <p id="countdown">Bạn sẽ được chuyển hướng sau <span id="timer">5</span> giây.</p>
+    <h1>Wait for me a second....</h1>
+    <p id="countdown"> <span id="timer">5</span> giây.</p>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -16,10 +16,10 @@
         const timerElement = document.getElementById('timer');
 
         if (shortUrl) {
-            const base64Url = shortUrl + "=="; // Thêm padding cho Base64
-            const secretKey = '123'; // Thay thế bằng khóa bí mật của bạn
+            const base64Url = shortUrl + "=="; 
+            const secretKey = '@1'; 
             const decryptedBytes = CryptoJS.AES.decrypt(atob(base64Url), secretKey);
-            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
+            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
             if (decodedUrl) {
                 let countdown = 5;
@@ -28,14 +28,14 @@
                     timerElement.innerText = --countdown;
                     if (countdown <= 0) {
                         clearInterval(interval);
-                        window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
+                        window.location.href = decodedUrl; 
                     }
                 }, 1000);
             } else {
-                document.body.innerText = "Không thể giải mã URL.";
+                document.body.innerText = "ERR URL.";
             }
         } else {
-            document.body.innerText = "Không có URL để chuyển hướng.";
+            document.body.innerText = "NOT URL.";
         }
     </script>
 </body>
