@@ -4,41 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirect Page</title>
-    <script>
-        function decodeUrl(shortId) {
-            const urlMap = JSON.parse(localStorage.getItem('urlMap')) || {};
-            return urlMap[shortId];
-        }
-
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedShortId = urlParams.get('url');
-            const shortId = atob(encodedShortId); 
-            const timerElement = document.getElementById('timer');
-
-            if (shortId) {
-                const originalUrl = decodeUrl(shortId);
-                if (originalUrl) {
-                    let countdown = 3;
-
-                    const interval = setInterval(() => {
-                        timerElement.innerText = --countdown;
-                        if (countdown <= 0) {
-                            clearInterval(interval);
-                            window.location.href = originalUrl; 
-                        }
-                    }, 1000);
-                } else {
-                    document.body.innerText = "URL ERR.";
-                }
-            } else {
-                document.body.innerText = "NOT URL.";
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <h1>Please Wait 3s</h1>
-    <p id="countdown">Please Wait ... <span id="timer">3</span> s.</p>
+    <h1>Đang chuyển hướng...</h1>
+    <p id="countdown">Bạn sẽ được chuyển hướng sau <span id="timer">5</span> giây.</p>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const base64Url = urlParams.get('url');
+        const timerElement = document.getElementById('timer');
+
+        if (base64Url) {
+            const encrypted = atob(base64Url); // Giải mã Base64
+            const secretKey = '123'; // Thay thế bằng khóa bí mật của bạn
+            const decryptedBytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+            const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Giải mã AES
+
+            if (decodedUrl) {
+                let countdown = 5;
+
+                const interval = setInterval(() => {
+                    timerElement.innerText = --countdown;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        window.location.href = decodedUrl; // Chuyển hướng đến URL gốc
+                    }
+                }, 1000);
+            } else {
+                document.body.innerText = "Không thể giải mã URL.";
+            }
+        } else {
+            document.body.innerText = "Không có URL để chuyển hướng.";
+        }
+    </script>
 </body>
 </html>
