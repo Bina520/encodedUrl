@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL 1</title>
+    <title>Mã hóa URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
@@ -14,15 +14,28 @@
     <p id="encodedOutput"></p>
 
     <script>
+        function generateRandomSuffix(length) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
         function encodeUrl() {
             const url = document.getElementById('urlInput').value;
             if (!url) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const secretKey = '123'; // Thay thế bằng khóa bí mật của bạn
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
             const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
-            const redirectLink = `bitly.li/NTyH?url=${encodeURIComponent(encrypted)}`; // Liên kết đến trang redirect
+            const base64Url = btoa(encrypted); // Mã hóa Base64
+
+            // Rút gọn chuỗi mã hóa xuống 10 ký tự
+            const shortUrl = base64Url.substring(0, 10); // Lấy 10 ký tự đầu tiên
+            const redirectLink = `redirect.html?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
 
