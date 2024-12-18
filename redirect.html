@@ -22,14 +22,14 @@
     <script>
         function decodeUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            const encryptedUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
-            if (!encryptedUrl) {
+            const shortUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
+            if (!shortUrl) {
                 document.getElementById('originalUrl').innerText = "Không có mã để giải mã.";
                 return;
             }
 
             const secretKey = '123'; // Thay thế bằng khóa bí mật của bạn
-            const decrypted = CryptoJS.AES.decrypt(encryptedUrl, secretKey).toString(CryptoJS.enc.Utf8);
+            const decrypted = CryptoJS.AES.decrypt(atob(shortUrl), secretKey).toString(CryptoJS.enc.Utf8);
 
             if (decrypted) {
                 document.getElementById('originalUrl').innerText = `URL gốc: ${decrypted}`;
