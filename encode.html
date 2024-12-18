@@ -14,28 +14,54 @@
     <p id="encodedOutput"></p>
 
     <script>
-        function generateRandomSuffix(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
         function encodeUrl() {
             const url = document.getElementById('urlInput').value;
             if (!url) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
-            const secretKey = '@'; // Thay thế bằng khóa bí mật của bạn
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
             const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
-            const base64Url = btoa(encrypted); // Mã hóa Base64
+            const redirectLink = `redirect.html?url=${encodeURIComponent(encrypted)}`; // Liên kết đến trang redirect
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+        }
 
-            // Rút gọn chuỗi mã hóa và thêm hậu tố ngẫu nhiên
-            const shortUrl = base64Url.substring(0, 5) + generateRandomSuffix(5); // Lấy 5 ký tự đầu tiên và thêm 5 ký tự ngẫu nhiên
-            const redirectLink = `redirect.html?url=${encodeURIComponent(shortUrl)}`; // Liên kết đến trang redirect
+        function copyLink() {
+            const outputText = document.getElementById('encodedOutput').innerText;
+            const link = outputText.replace('Liên kết đã mã hóa: ', ''); // Lấy chỉ phần liên kết
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Liên kết đã được sao chép vào clipboard!");
+            }, (err) => {
+                alert("Không thể sao chép liên kết: ", err);
+            });
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã hóa URL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <h1>Mã hóa URL</h1>
+    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
+    <button onclick="encodeUrl()">Mã hóa</button>
+    <button onclick="copyLink()">Sao chép liên kết</button>
+    <p id="encodedOutput"></p>
+
+    <script>
+        function encodeUrl() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert("Vui lòng nhập một URL hợp lệ.");
+                return;
+            }
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
+            const encrypted = CryptoJS.AES.encrypt(url, secretKey).toString(); // Mã hóa bằng AES
+            const redirectLink = `redirect.html?url=${encodeURIComponent(encrypted)}`; // Liên kết đến trang redirect
             document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
         }
 
