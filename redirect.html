@@ -3,61 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirect URL</title>
+    <title>Giải mã URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         #adFrame {
             width: 100%;
-            height: 320px; 
+            height: 300px; /* Chiều cao của iframe */
             border: none;
         }
     </style>
 </head>
 <body>
-    <h1>Please wait a moment</h1>
+    <h1>Giải mã URL</h1>
     <p id="originalUrl"></p>
     <p id="countdown"></p>
-    <iframe id="adFrame" src="https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" style="display:none;"></iframe> 
+    <iframe id="adFrame" src="https://your-ad-link.com" style="display:none;"></iframe> <!-- Thay thế bằng liên kết quảng cáo của bạn -->
 
     <script>
         function decodeUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            const shortUrl = urlParams.get('url'); 
+            const shortUrl = urlParams.get('url'); // Lấy mã đã mã hóa từ URL
             if (!shortUrl) {
-                document.getElementById('originalUrl').innerText = "NOT URL.";
+                document.getElementById('originalUrl').innerText = "Không có mã để giải mã.";
                 return;
             }
 
-            const base64Url = shortUrl.substring(0, 5); 
-            const secretKey = '@'; 
+            const base64Url = shortUrl.substring(0, 5); // Lấy 5 ký tự đầu tiên
+            const secretKey = 'your-secret-key'; // Thay thế bằng khóa bí mật của bạn
 
+            // Giải mã
             const decrypted = CryptoJS.AES.decrypt(atob(base64Url), secretKey).toString(CryptoJS.enc.Utf8);
             if (decrypted) {
-                document.getElementById('originalUrl').innerText = `URL: ${decrypted}`;
-                startCountdown(); 
+                document.getElementById('originalUrl').innerText = `URL gốc: ${decrypted}`;
+                startCountdown(decrypted); // Bắt đầu đếm ngược với URL gốc
             } else {
-                document.getElementById('originalUrl').innerText = "NOT URL.";
+                document.getElementById('originalUrl').innerText = "Không tìm thấy URL tương ứng với mã đã mã hóa.";
             }
         }
 
-        function startCountdown() {
-            let countdown = 5; 
+        function startCountdown(originalUrl) {
+            let countdown = 5; // Thời gian đếm ngược
             const countdownElement = document.getElementById('countdown');
-            countdownElement.innerText = `Please wait ${countdown} s...`;
+            countdownElement.innerText = `Chuyển hướng trong ${countdown} giây...`;
 
             const interval = setInterval(() => {
                 countdown--;
-                countdownElement.innerText = `Please wait ${countdown} s...`;
+                countdownElement.innerText = `Chuyển hướng trong ${countdown} giây...`;
                 if (countdown <= 0) {
                     clearInterval(interval);
-                    window.location.href = document.getElementById('originalUrl').innerText.replace('URL: ', ''); 
+                    window.location.href = originalUrl; // Chuyển hướng đến URL gốc
                 }
             }, 1000);
         }
 
         window.onload = function() {
-            decodeUrl(); 
-            document.getElementById('adFrame').style.display = 'block'; 
+            decodeUrl(); // Gọi hàm khi trang được tải
+            document.getElementById('adFrame').style.display = 'block'; // Hiển thị iframe quảng cáo
         };
     </script>
 </body>
