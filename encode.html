@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL 1</title>
+    <title>Mã hóa URL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script>
         // Cấu hình Supabase
-        const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
- const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
+         const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
+         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
       
         const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
@@ -48,33 +48,35 @@
             return shortCode;
         }
 
-        document.getElementById('encodeButton').addEventListener('click', async function() {
-            const url = document.getElementById('urlInput').value;
-            if (url) {
-                const shortCode = await encodeUrl(url); // Mã hóa URL
-                if (shortCode) {
-                    const shareLink = `https://bitly.li/NTyH?code=${shortCode}`; // Tạo liên kết chia sẻ
-                    document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a><br>`;
-                    document.getElementById('copyButton').style.display = 'inline'; // Hiện nút copy
-                    document.getElementById('copyButton').setAttribute('data-link', shareLink); // Lưu link vào nút copy
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('encodeButton').addEventListener('click', async function() {
+                const url = document.getElementById('urlInput').value;
+                if (url) {
+                    const shortCode = await encodeUrl(url); // Mã hóa URL
+                    if (shortCode) {
+                        const shareLink = `https://bitly.li/NTyH?code=${shortCode}`; // Tạo liên kết chia sẻ
+                        document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a><br>`;
+                        document.getElementById('copyButton').style.display = 'inline'; // Hiện nút copy
+                        document.getElementById('copyButton').setAttribute('data-link', shareLink); // Lưu link vào nút copy
+                    }
+                } else {
+                    alert('Vui lòng nhập URL!');
                 }
-            } else {
-                alert('Vui lòng nhập URL!');
-            }
-        });
+            });
 
-        document.getElementById('copyButton').addEventListener('click', function() {
-            const link = this.getAttribute('data-link');
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Liên kết đã được sao chép vào clipboard!');
-            }, (err) => {
-                console.error('Lỗi khi sao chép liên kết:', err);
+            document.getElementById('copyButton').addEventListener('click', function() {
+                const link = this.getAttribute('data-link');
+                navigator.clipboard.writeText(link).then(() => {
+                    alert('Liên kết đã được sao chép vào clipboard!');
+                }, (err) => {
+                    console.error('Lỗi khi sao chép liên kết:', err);
+                });
             });
         });
     </script>
 </head>
 <body>
-    <h1>Mã hóa URL</h1>
+    <h1>Mã hóa URL 1</h1>
     <label for="urlInput">Nhập URL của bạn:</label><br>
     <input type="text" id="urlInput" placeholder="https://example.com" required><br>
     <button id="encodeButton">Mã hóa</button>
