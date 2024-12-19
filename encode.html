@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
-    <script>
-        // Cấu hình Supabase
-        const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
-         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
-      
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    <script type="module">
+        // Nhập các thông tin từ tệp cấu hình
+        import { supabaseUrl, supabaseAnonKey } from './config.js';
+
+        // Tạo client Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
         // Hàm tạo mã ngẫu nhiên
         function generateRandomCode(length) {
