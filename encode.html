@@ -7,11 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script>
         // Cấu hình Supabase
-         const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
-         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
-      
+        const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
+ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
+
         const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+        // Hàm tạo mã ngẫu nhiên
         function generateRandomCode(length) {
             const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let result = '';
@@ -21,6 +22,7 @@
             return result;
         }
 
+        // Hàm mã hóa URL
         async function encodeUrl(url) {
             let shortCode;
             let isUnique = false;
@@ -48,6 +50,7 @@
             return shortCode;
         }
 
+        // Khởi tạo sự kiện sau khi DOM đã tải
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('encodeButton').addEventListener('click', async function() {
                 const url = document.getElementById('urlInput').value;
@@ -76,7 +79,7 @@
     </script>
 </head>
 <body>
-    <h1>Mã hóa URL 1</h1>
+    <h1>Mã hóa URL</h1>
     <label for="urlInput">Nhập URL của bạn:</label><br>
     <input type="text" id="urlInput" placeholder="https://example.com" required><br>
     <button id="encodeButton">Mã hóa</button>
