@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <style>
         body {
@@ -17,7 +18,7 @@
     </style>
 </head>
 <body>
-    <h1>Mã hóa URL 1</h1>
+    <h1>Mã hóa URL</h1>
     <label for="urlInput">Nhập URL của bạn:</label><br>
     <input type="text" id="urlInput" placeholder="https://example.com" required><br>
     <button id="encodeButton">Mã hóa</button>
@@ -39,9 +40,9 @@
             const url = document.getElementById('urlInput').value;
             if (url) {
                 const randomCode = generateRandomCode(8); // Tạo mã ngẫu nhiên 8 ký tự
-                const encodedUrl = CryptoJS.AES.encrypt(url, 'secret-key').toString(); // Mã hóa URL bằng AES
-                const finalCode = `${randomCode}-${encodedUrl}`; // Kết hợp mã ngẫu nhiên và URL đã mã hóa
-                const shareLink = `https://bitly.li/NTyH?=${encodeURIComponent(finalCode)}`; // Tạo liên kết chia sẻ
+                const compressedUrl = LZString.compressToEncodedURIComponent(url); // Nén URL
+                const finalCode = `${randomCode}-${compressedUrl}`; // Kết hợp mã ngẫu nhiên và URL đã nén
+                const shareLink = `https://bitly.li/NTyH?code=${encodeURIComponent(finalCode)}`; // Tạo liên kết chia sẻ
                 document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a>`;
             } else {
                 alert('Vui lòng nhập URL!');
