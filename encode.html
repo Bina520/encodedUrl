@@ -8,9 +8,8 @@
     <script>
         // Cấu hình Supabase
         const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
- const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
-
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey); // Đổi tên biến
 
         // Hàm tạo mã ngẫu nhiên
         function generateRandomCode(length) {
@@ -30,7 +29,7 @@
             // Kiểm tra mã ngắn có trùng lặp không
             do {
                 shortCode = generateRandomCode(6); // Độ dài mã ngắn là 6 ký tự
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient // Sử dụng supabaseClient
                     .from('urls')
                     .select('*')
                     .eq('shortened_url', shortCode);
@@ -38,7 +37,7 @@
             } while (!isUnique);
 
             // Lưu trữ ánh xạ giữa mã ngắn và URL
-            const { error } = await supabase
+            const { error } = await supabaseClient // Sử dụng supabaseClient
                 .from('urls')
                 .insert([{ original_url: url, shortened_url: shortCode }]);
 
