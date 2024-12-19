@@ -5,26 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
     <script>
-        const urlMapping = {
-            // Các ánh xạ URL sẽ được thêm tự động khi mã hóa
-        };
-
         window.onload = function() {
             // Lấy mã đã mã hóa từ URL
             const urlParams = new URLSearchParams(window.location.search);
             const encodedInput = urlParams.get('code');
-            if (encodedInput && urlMapping[encodedInput]) {
-                const decodedUrl = urlMapping[encodedInput]; // Giải mã URL
-                // Tự động chuyển hướng đến URL đã giải mã
-                window.location.href = decodedUrl;
+            if (encodedInput) {
+                alert(`Mã ngắn bạn đã nhận được là: ${encodedInput}. Không thể giải mã URL gốc!`);
             } else {
-                alert('Mã không hợp lệ hoặc không tồn tại!');
+                alert('Mã không hợp lệ!');
             }
         };
     </script>
 </head>
 <body>
     <h1>Giải mã URL</h1>
-    <p>Đang chuyển hướng...</p>
+    <p>Đang xử lý...</p>
 </body>
 </html>
