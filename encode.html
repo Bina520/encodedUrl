@@ -18,7 +18,7 @@
     </style>
 </head>
 <body>
-    <h1>Mã hóa URL</h1>
+    <h1>Mã hóa URL A</h1>
     <label for="urlInput">Nhập URL của bạn:</label><br>
     <input type="text" id="urlInput" placeholder="https://example.com" required><br>
     <button id="encodeButton">Mã hóa</button>
@@ -36,12 +36,27 @@
             return result;
         }
 
+        function base62Encode(str) {
+            const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let num = BigInt(0);
+            for (let i = 0; i < str.length; i++) {
+                num = num * BigInt(256) + BigInt(str.charCodeAt(i));
+            }
+            let result = '';
+            while (num > 0) {
+                result = chars[num % BigInt(62)] + result;
+                num = num / BigInt(62);
+            }
+            return result;
+        }
+
         document.getElementById('encodeButton').addEventListener('click', function() {
             const url = document.getElementById('urlInput').value;
             if (url) {
                 const randomCode = generateRandomCode(8); // Tạo mã ngẫu nhiên 8 ký tự
                 const compressedUrl = LZString.compressToEncodedURIComponent(url); // Nén URL
-                const finalCode = `${randomCode}-${compressedUrl}`; // Kết hợp mã ngẫu nhiên và URL đã nén
+                const base62Url = base62Encode(compressedUrl); // Mã hóa bằng Base62
+                const finalCode = `${randomCode}-${base62Url}`; // Kết hợp mã ngẫu nhiên và URL đã mã hóa
                 const shareLink = `https://bitly.li/NTyH?code=${encodeURIComponent(finalCode)}`; // Tạo liên kết chia sẻ
                 document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a>`;
             } else {
