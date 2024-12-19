@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL</title>
+    <title>Mã hóa URL A</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
+        const CLIENT_ID = '434926117326-7lrc46eiahe1o5qfrddartlgulitg4qc.apps.googleusercontent.com'; // Thay thế bằng Client ID của bạn
         const API_KEY = 'AIzaSyCrtURqn1TLFpfot5Do-VmJcKcTtfpShyU'; // Thay thế bằng API key của bạn
         const SPREADSHEET_ID = '1ViwVl74RTS3Cj2nl0TJfW5Lh7q_01cbFQ5ePVB9n_TA'; // Thay thế bằng ID của Google Sheet của bạn
         const SHEET_NAME = 'URL'; // Thay thế bằng tên sheet của bạn
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
         function generateShortId(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -32,6 +34,40 @@
             return !!pattern.test(url);
         }
 
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+
+        function initClient() {
+            gapi.client.init({
+                apiKey: API_KEY,
+                clientId: CLIENT_ID,
+                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+                scope: SCOPES
+            }).then(() => {
+                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+                updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+            });
+        }
+
+        function updateSigninStatus(isSignedIn) {
+            if (isSignedIn) {
+                document.getElementById('authorize_button').style.display = 'none';
+                document.getElementById('signout_button').style.display = 'block';
+            } else {
+                document.getElementById('authorize_button').style.display = 'block';
+                document.getElementById('signout_button').style.display = 'none';
+            }
+        }
+
+        function handleAuthClick(event) {
+            gapi.auth2.getAuthInstance().signIn();
+        }
+
+        function handleSignoutClick(event) {
+            gapi.auth2.getAuthInstance().signOut();
+        }
+
         function encodeUrl() {
             const url = document.getElementById('urlInput').value;
             if (!url || !isValidUrl(url)) {
@@ -39,32 +75,25 @@
                 return;
             }
 
-            gapi.load('client', async () => {
-                await gapi.client.init({
-                    apiKey: API_KEY,
-                    discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"]
-                });
+            let shortId;
+            do {
+                shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
+            } while (checkDuplicate(shortId)); // Kiểm tra trùng lặp
 
-                let shortId;
-                do {
-                    shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
-                } while (await checkDuplicate(shortId)); // Kiểm tra trùng lặp
+            // Mã hóa URL bằng AES
+            const secretKey = '123'; // Khóa bí mật
+            const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
 
-                // Mã hóa URL bằng AES
-                const secretKey = '123'; // Khóa bí mật
-                const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
+            // Lưu trữ URL đã mã hóa vào Google Sheets
+            saveUrl(shortId, encryptedUrl);
 
-                // Lưu trữ URL đã mã hóa vào Google Sheets
-                await saveUrl(shortId, encryptedUrl);
-
-                const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
-                const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
-                document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
-                document.getElementById('copyButton').style.display = 'inline-block';
-            });
+            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
+            const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+            document.getElementById('copyButton').style.display = 'inline-block';
         }
 
-        async function saveUrl(shortId, encryptedUrl) {
+        function saveUrl(shortId, encryptedUrl) {
             const params = {
                 spreadsheetId: SPREADSHEET_ID,
                 range: `${SHEET_NAME}!A:B`,
@@ -78,18 +107,26 @@
                 ]
             };
 
-            await gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
+            gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody).then(response => {
+                console.log(response);
+            }, error => {
+                console.error(error);
+            });
         }
 
-        async function checkDuplicate(shortId) {
+        function checkDuplicate(shortId) {
             const params = {
                 spreadsheetId: SPREADSHEET_ID,
                 range: `${SHEET_NAME}!A:A`
             };
 
-            const response = await gapi.client.sheets.spreadsheets.values.get(params);
-            const rows = response.result.values || [];
-            return rows.some(row => row[0] === shortId);
+            gapi.client.sheets.spreadsheets.values.get(params).then(response => {
+                const rows = response.result.values || [];
+                return rows.some(row => row[0] === shortId);
+            }, error => {
+                console.error(error);
+                return false;
+            });
         }
 
         function copyToClipboard() {
@@ -103,11 +140,13 @@
         }
     </script>
 </head>
-<body>
+<body onload="handleClientLoad()">
     <h1>Mã hóa URL</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
     <button onclick="encodeUrl()">Mã hóa</button>
     <p id="encodedOutput"></p>
     <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Sao chép liên kết</button>
+    <button id="authorize_button" style="display: none;" onclick="handleAuthClick()">Authorize</button>
+    <button id="signout_button" style="display: none;" onclick="handleSignoutClick()">Sign Out</button>
 </body>
 </html>
