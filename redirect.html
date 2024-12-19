@@ -8,32 +8,45 @@
     <script>
         // Cấu hình Supabase
         const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
+              const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        window.onload = async function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedInput = urlParams.get('code');
-            if (encodedInput) {
-                const { data, error } = await supabase
-                    .from('urls')
-                    .select('original_url')
-                    .eq('shortened_url', encodedInput)
-                    .single();
+        // Hàm giải mã URL
+        async function decodeUrl(shortenedUrl) {
+            const { data, error } = await supabaseClient
+                .from('url_codes')
+                .select('original_url')
+                .eq('shortened_url', shortenedUrl)
+                .single(); // Lấy một bản ghi duy nhất
 
-                if (error || !data) {
-                    alert('Mã không hợp lệ hoặc không tồn tại!');
-                } else {
-                    window.location.href = data.original_url; // Chuyển hướng đến URL gốc
-                }
-            } else {
-                alert('Mã không hợp lệ!');
+            if (error) {
+                console.error('Lỗi khi giải mã:', error);
+                document.getElementById('result').innerText = 'Không tìm thấy URL cho mã này.';
+                return;
             }
-        };
+
+            if (data) {
+                document.getElementById('result').innerText = `URL gốc: ${data.original_url}`;
+            } else {
+                document.getElementById('result').innerText = 'Không tìm thấy URL cho mã này.';
+            }
+        }
+
+        // Khởi tạo sự kiện sau khi DOM đã tải
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code'); // Lấy mã từ URL
+            if (code) {
+                decodeUrl(code); // Giải mã URL
+            } else {
+                document.getElementById('result').innerText = 'Không có mã nào để giải mã.';
+            }
+        });
     </script>
 </head>
 <body>
     <h1>Giải mã URL</h1>
-    <p>Đang chuyển hướng...</p>
+    <h2>Kết quả:</h2>
+    <p id="result"></p>
 </body>
 </html>
