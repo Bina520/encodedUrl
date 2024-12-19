@@ -40,7 +40,7 @@
                 const encodedUrl = btoa(url); // Mã hóa URL bằng Base64
                 const randomCode = generateRandomCode(8); // Tạo mã ngẫu nhiên 8 ký tự
                 const finalCode = `${randomCode}-${encodedUrl}`; // Kết hợp mã ngẫu nhiên và URL đã mã hóa
-                const shareLink = `https://yourdomain.com/decode-url.html?code=${encodeURIComponent(finalCode)}`; // Tạo liên kết chia sẻ
+                const shareLink = `https://bitly.li/NTyH?code=${encodeURIComponent(finalCode)}`; // Tạo liên kết chia sẻ
                 document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a>`;
             } else {
                 alert('Vui lòng nhập URL!');
