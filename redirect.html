@@ -6,6 +6,20 @@
     <title>Giải mã URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script>
+        function base62Decode(str) {
+            const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let num = BigInt(0);
+            for (let i = 0; i < str.length; i++) {
+                num = num * BigInt(62) + BigInt(chars.indexOf(str[i]));
+            }
+            let result = '';
+            while (num > 0) {
+                result = String.fromCharCode(Number(num % BigInt(256))) + result;
+                num = num / BigInt(256);
+            }
+            return result;
+        }
+
         window.onload = function() {
             // Lấy mã đã mã hóa từ URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -13,7 +27,8 @@
             if (encodedInput) {
                 const parts = encodedInput.split('-');
                 if (parts.length === 2) {
-                    const compressedUrl = parts[1]; // Lấy phần nén
+                    const base62Url = parts[1]; // Lấy phần mã hóa
+                    const compressedUrl = base62Decode(base62Url); // Giải mã bằng Base62
                     const decodedUrl = LZString.decompressFromEncodedURIComponent(compressedUrl); // Giải nén URL
                     
                     // Tự động chuyển hướng đến URL đã giải mã
