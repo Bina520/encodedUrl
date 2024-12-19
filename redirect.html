@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <script>
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyDcPeES3y_SJXE0NESUdsb46FFooU1OpZlmKyDUJTWJuToUG_iXPhSaP-pkfOriHoQ/exec'; // Thay thế bằng URL của Google Apps Script
+        const API_KEY = 'AIzaSyCrtURqn1TLFpfot5Do-VmJcKcTtfpShyU'; // Thay thế bằng API key của bạn
+        const SPREADSHEET_ID = '1ViwVl74RTS3Cj2nl0TJfW5Lh7q_01cbFQ5ePVB9n_TA'; // Thay thế bằng ID của Google Sheet của bạn
+        const SHEET_NAME = 'URL'; // Thay thế bằng tên sheet của bạn
 
         async function redirectToUrl() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -17,36 +20,41 @@
             }
 
             const shortId = atob(encodedShortId); // Giải mã Base64
-            const encryptedUrl = await getUrl(shortId); // Lấy URL đã mã hóa từ mã ngắn
 
-            if (encryptedUrl) {
-                const secretKey = '123'; // Khóa bí mật
-                const decryptedBytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey); // Giải mã URL
-                const originalUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"]
+                });
 
-                if (originalUrl) {
-                    window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+                const encryptedUrl = await getUrl(shortId); // Lấy URL đã mã hóa từ mã ngắn
+
+                if (encryptedUrl) {
+                    const secretKey = '123'; // Khóa bí mật
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey); // Giải mã URL
+                    const originalUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
+
+                    if (originalUrl) {
+                        window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+                    } else {
+                        document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
+                    }
                 } else {
                     document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
                 }
-            } else {
-                document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
-            }
+            });
         }
 
         async function getUrl(shortId) {
-            const response = await fetch(scriptUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'get',
-                    shortId: shortId
-                })
-            });
-            const result = await response.json();
-            return result.encryptedUrl;
+            const params = {
+                spreadsheetId: SPREADSHEET_ID,
+                range: `${SHEET_NAME}!A:B`
+            };
+
+            const response = await gapi.client.sheets.spreadsheets.values.get(params);
+            const rows = response.result.values || [];
+            const row = rows.find(row => row[0] === shortId);
+            return row ? row[1] : null;
         }
 
         window.onload = redirectToUrl; // Gọi hàm khi trang được tải
