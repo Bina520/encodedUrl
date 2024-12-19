@@ -4,25 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        async function saveLink() {
+        const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // Thay thế bằng URL của Google Apps Script
+
+        function generateShortId(length) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        function isValidUrl(url) {
+            const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+                '((([a-z\\d]([a-z\\d-]*[a-z\\d])?)\\.)+[a-z]{2,}|' + // domain name
+                'localhost|' + // localhost
+                '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' + // IP address
+                '\\[?[a-fA-F0-9]*:[a-fA-F0-9:]+\\]?)' + // IPv6
+                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+            return !!pattern.test(url);
+        }
+
+        async function encodeUrl() {
             const url = document.getElementById('urlInput').value;
-            if (!url) {
+            if (!url || !isValidUrl(url)) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
 
-            const response = await fetch('https://script.google.com/macros/s/AKfycbzC_YzGRaP1oQYLe2EgKCto_98r3JSWEOEjdpT2Yppjf6vlm9rmz3YE8doI0bogIwfc/exec', {
+            let shortId;
+            do {
+                shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
+            } while (await checkDuplicate(shortId)); // Kiểm tra trùng lặp
+
+            // Mã hóa URL bằng AES
+            const secretKey = '123'; // Khóa bí mật
+            const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
+
+            // Lưu trữ URL đã mã hóa vào Google Sheets
+            await saveUrl(shortId, encryptedUrl);
+
+            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
+            const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+            document.getElementById('copyButton').style.display = 'inline-block';
+        }
+
+        async function saveUrl(shortId, encryptedUrl) {
+            const response = await fetch(scriptUrl, {
                 method: 'POST',
-                body: JSON.stringify({ originalLink: url }),
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    action: 'save',
+                    shortId: shortId,
+                    encryptedUrl: encryptedUrl
+                })
             });
             const result = await response.json();
-            const shortLink = `${window.location.origin}encodedUrl/decode.html?code=${result.shortCode}`;
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${shortLink}`;
-            document.getElementById('copyButton').style.display = 'inline-block';
+            if (result.status !== 'success') {
+                alert('Lỗi khi lưu URL.');
+            }
+        }
+
+        async function checkDuplicate(shortId) {
+            const response = await fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get',
+                    shortId: shortId
+                })
+            });
+            const result = await response.json();
+            return result.encryptedUrl !== undefined;
         }
 
         function copyToClipboard() {
@@ -39,8 +101,8 @@
 <body>
     <h1>Mã hóa URL</h1>
     <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
-    <button onclick="saveLink()">Mã hóa</button>
+    <button onclick="encodeUrl()">Mã hóa</button>
     <p id="encodedOutput"></p>
-    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Copy Link</button>
+    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Sao chép liên kết</button>
 </body>
 </html>
