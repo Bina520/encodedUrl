@@ -22,14 +22,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const encodedInput = urlParams.get('code');
             if (encodedInput) {
-                const parts = encodedInput.split('-');
-                if (parts.length === 2) {
-                    const encodedUrl = parts[1]; // Lấy phần mã hóa
-                    const decodedUrl = atob(encodedUrl); // Giải mã URL bằng Base64
-                    document.getElementById('decodedResult').innerText = `URL đã giải mã: ${decodedUrl}`;
-                } else {
-                    document.getElementById('decodedResult').innerText = 'Mã không hợp lệ!';
-                }
+                const decodedUrl = atob(encodedInput); // Giải mã URL bằng Base64
+                document.getElementById('decodedResult').innerHTML = `URL đã giải mã: <a href="${decodedUrl}" target="_blank">${decodedUrl}</a>`;
             } else {
                 document.getElementById('decodedResult').innerText = 'Không có mã nào để giải mã!';
             }
