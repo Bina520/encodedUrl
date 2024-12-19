@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giải mã URL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // Thay thế bằng URL của Google Apps Script
+
+        async function redirectToUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedShortId = urlParams.get('url'); // Lấy mã ngắn đã mã hóa
+            if (!encodedShortId) {
+                document.body.innerText = "Không có mã ngắn để giải mã.";
+                return;
+            }
+
+            const shortId = atob(encodedShortId); // Giải mã Base64
+            const encryptedUrl = await getUrl(shortId); // Lấy URL đã mã hóa từ mã ngắn
+
+            if (encryptedUrl) {
+                const secretKey = '123'; // Khóa bí mật
+                const decryptedBytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey); // Giải mã URL
+                const originalUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
+
+                if (originalUrl) {
+                    window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+                } else {
+                    document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
+                }
+            } else {
+                document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
+            }
+        }
+
+        async function getUrl(shortId) {
+            const response = await fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'get',
+                    shortId: shortId
+                })
+            });
+            const result = await response.json();
+            return result.encryptedUrl;
+        }
+
+        window.onload = redirectToUrl; // Gọi hàm khi trang được tải
+    </script>
+</head>
+<body>
+    <h1>Đang chuyển hướng...</h1>
+    <p id="status">Đang tìm URL gốc...</p>
+</body>
+</html>
