@@ -4,80 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-        		const CLIENT_ID = '434926117326-7lrc46eiahe1o5qfrddartlgulitg4qc.apps.googleusercontent.com'; // Thay thế bằng Client ID của bạn
-        const API_KEY = 'AIzaSyCrtURqn1TLFpfot5Do-VmJcKcTtfpShyU'; // Thay thế bằng API key của bạn
-        const SPREADSHEET_ID = '1ViwVl74RTS3Cj2nl0TJfW5Lh7q_01cbFQ5ePVB9n_TA'; // Thay thế bằng ID của Google Sheet của bạn
-        const SHEET_NAME = 'URL'; // Thay thế bằng tên sheet của bạn
-
-        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-
-        function handleClientLoad() {
-            gapi.load('client:auth2', initClient);
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-
-        function initClient() {
-            gapi.client.init({
-                apiKey: API_KEY,
-                clientId: CLIENT_ID,
-                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
-                scope: SCOPES
-            }).then(() => {
-                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-                updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-            });
-        }
-
-        function updateSigninStatus(isSignedIn) {
-            if (isSignedIn) {
-                redirectToUrl();
-            } else {
-                gapi.auth2.getAuthInstance().signIn();
-            }
-        }
-
-        async function redirectToUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const encodedShortId = urlParams.get('url'); // Lấy mã ngắn đã mã hóa
-            if (!encodedShortId) {
-                document.body.innerText = "Không có mã ngắn để giải mã.";
-                return;
-            }
-
-            const shortId = atob(encodedShortId); // Giải mã Base64
-
-            const params = {
-                spreadsheetId: SPREADSHEET_ID,
-                range: `${SHEET_NAME}!A:B`
-            };
-
-            const response = await gapi.client.sheets.spreadsheets.values.get(params);
-            const rows = response.result.values || [];
-            const row = rows.find(row => row[0] === shortId);
-            const encryptedUrl = row ? row[1] : null;
-
-            if (encryptedUrl) {
-                const secretKey = '123'; // Khóa bí mật
-                const decryptedBytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey); // Giải mã URL
-                const originalUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
-
-                if (originalUrl) {
-                    window.location.href = originalUrl; // Chuyển hướng đến URL gốc
-                } else {
-                    document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
-                }
-            } else {
-                document.body.innerText = "Không tìm thấy URL tương ứng với mã ngắn.";
-            }
-        }
-
-        window.onload = handleClientLoad; // Gọi hàm khi trang được tải
-    </script>
+    </style>
 </head>
 <body>
-    <h1>Đang chuyển hướng...</h1>
-    <p id="status">Đang tìm URL gốc...</p>
+    <h1>Giải mã URL</h1>
+    <h2>Kết quả:</h2>
+    <p id="decodedResult"></p>
+
+    <script>
+        window.onload = function() {
+            // Lấy mã đã mã hóa từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedInput = urlParams.get('code');
+            if (encodedInput) {
+                const parts = encodedInput.split('-');
+                if (parts.length === 2) {
+                    const encodedUrl = parts[1]; // Lấy phần mã hóa
+                    const decodedUrl = atob(encodedUrl); // Giải mã URL bằng Base64
+                    document.getElementById('decodedResult').innerText = `URL đã giải mã: ${decodedUrl}`;
+                } else {
+                    document.getElementById('decodedResult').innerText = 'Mã không hợp lệ!';
+                }
+            } else {
+                document.getElementById('decodedResult').innerText = 'Không có mã nào để giải mã!';
+            }
+        };
+    </script>
 </body>
 </html>
