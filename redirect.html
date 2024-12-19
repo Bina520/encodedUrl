@@ -9,7 +9,8 @@
         // Cấu hình Supabase
         const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
          const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
-              const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         // Hàm giải mã URL
         async function decodeUrl(shortenedUrl) {
@@ -26,7 +27,19 @@
             }
 
             if (data) {
-                document.getElementById('result').innerText = `URL gốc: ${data.original_url}`;
+                // Hiển thị thông báo đếm ngược
+                let countdown = 5; // Thời gian đếm ngược
+                document.getElementById('result').innerText = `Bạn sẽ được chuyển hướng đến URL gốc: ${data.original_url} trong ${countdown} giây.`;
+                
+                // Đếm ngược và chuyển hướng
+                const interval = setInterval(() => {
+                    countdown--;
+                    document.getElementById('result').innerText = `Bạn sẽ được chuyển hướng đến URL gốc: ${data.original_url} trong ${countdown} giây.`;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        window.location.href = data.original_url; // Chuyển hướng đến URL gốc
+                    }
+                }, 1000);
             } else {
                 document.getElementById('result').innerText = 'Không tìm thấy URL cho mã này.';
             }
