@@ -10,7 +10,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const encodedInput = urlParams.get('code');
             if (encodedInput) {
-                alert(`Mã ngắn bạn đã nhận được là: ${encodedInput}. Không thể giải mã URL gốc!`);
+                // Giải mã URL bằng Base64
+                const decodedUrl = atob(encodedInput);
+                // Tự động chuyển hướng đến URL đã giải mã
+                window.location.href = decodedUrl;
             } else {
                 alert('Mã không hợp lệ!');
             }
@@ -19,6 +22,6 @@
 </head>
 <body>
     <h1>Giải mã URL</h1>
-    <p>Đang xử lý...</p>
+    <p>Đang chuyển hướng...</p>
 </body>
 </html>
