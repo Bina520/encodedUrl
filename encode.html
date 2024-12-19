@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mã hóa URL</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,7 +16,7 @@
     </style>
 </head>
 <body>
-    <h1>Mã hóa URL A</h1>
+    <h1>Mã hóa URL</h1>
     <label for="urlInput">Nhập URL của bạn:</label><br>
     <input type="text" id="urlInput" placeholder="https://example.com" required><br>
     <button id="encodeButton">Mã hóa</button>
@@ -27,37 +25,38 @@
     <p id="result"></p>
 
     <script>
+        const urlMapping = {}; // Bảng ánh xạ URL
+        const base62Chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
         function generateRandomCode(length) {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
             for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
+                result += base62Chars.charAt(Math.floor(Math.random() * base62Chars.length));
             }
             return result;
         }
 
-        function base62Encode(str) {
-            const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let num = BigInt(0);
-            for (let i = 0; i < str.length; i++) {
-                num = num * BigInt(256) + BigInt(str.charCodeAt(i));
+        function encodeUrl(url) {
+            // Kiểm tra xem URL đã có trong bảng ánh xạ chưa
+            for (const [key, value] of Object.entries(urlMapping)) {
+                if (value === url) {
+                    return key; // Trả về mã ngắn nếu URL đã tồn tại
+                }
             }
-            let result = '';
-            while (num > 0) {
-                result = chars[num % BigInt(62)] + result;
-                num = num / BigInt(62);
-            }
-            return result;
+            // Tạo mã ngẫu nhiên 5 ký tự
+            let shortCode;
+            do {
+                shortCode = generateRandomCode(5);
+            } while (urlMapping[shortCode]); // Đảm bảo mã ngẫu nhiên không bị trùng
+            urlMapping[shortCode] = url; // Thêm vào bảng ánh xạ
+            return shortCode;
         }
 
         document.getElementById('encodeButton').addEventListener('click', function() {
             const url = document.getElementById('urlInput').value;
             if (url) {
-                const randomCode = generateRandomCode(8); // Tạo mã ngẫu nhiên 8 ký tự
-                const compressedUrl = LZString.compressToEncodedURIComponent(url); // Nén URL
-                const base62Url = base62Encode(compressedUrl); // Mã hóa bằng Base62
-                const finalCode = `${randomCode}-${base62Url}`; // Kết hợp mã ngẫu nhiên và URL đã mã hóa
-                const shareLink = `https://bitly.li/NTyH?code=${encodeURIComponent(finalCode)}`; // Tạo liên kết chia sẻ
+                const shortCode = encodeUrl(url); // Mã hóa URL
+                const shareLink = `https://bitly.li/NTyH?code=${shortCode}`; // Tạo liên kết chia sẻ
                 document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a>`;
             } else {
                 alert('Vui lòng nhập URL!');
