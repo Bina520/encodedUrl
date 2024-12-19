@@ -4,30 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Giải mã URL</h1>
-    <h2>Kết quả:</h2>
-    <p id="decodedResult"></p>
-
     <script>
         window.onload = function() {
             // Lấy mã đã mã hóa từ URL
             const urlParams = new URLSearchParams(window.location.search);
             const encodedInput = urlParams.get('code');
             if (encodedInput) {
-                const decodedUrl = atob(encodedInput); // Giải mã URL bằng Base64
-                document.getElementById('decodedResult').innerHTML = `URL đã giải mã: <a href="${decodedUrl}" target="_blank">${decodedUrl}</a>`;
+                const parts = encodedInput.split('-');
+                if (parts.length === 2) {
+                    const encodedUrl = parts[1]; // Lấy phần mã hóa
+                    const decodedUrl = atob(encodedUrl); // Giải mã URL bằng Base64
+                    
+                    // Tự động chuyển hướng đến URL đã giải mã
+                    window.location.href = decodedUrl;
+                } else {
+                    alert('Mã không hợp lệ!');
+                }
             } else {
-                document.getElementById('decodedResult').innerText = 'Không có mã nào để giải mã!';
+                alert('Không có mã nào để giải mã!');
             }
         };
     </script>
+</head>
+<body>
+    <h1>Giải mã URL</h1>
+    <p>Đang chuyển hướng...</p>
 </body>
 </html>
