@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script>
         window.onload = function() {
             // Lấy mã đã mã hóa từ URL
@@ -13,12 +13,15 @@
             if (encodedInput) {
                 const parts = encodedInput.split('-');
                 if (parts.length === 2) {
-                    const encodedUrl = parts[1]; // Lấy phần mã hóa
-                    const decryptedBytes = CryptoJS.AES.decrypt(encodedUrl, 'secret-key'); // Giải mã URL bằng AES
-                    const decodedUrl = decryptedBytes.toString(CryptoJS.enc.Utf8); // Chuyển đổi thành chuỗi
-
+                    const compressedUrl = parts[1]; // Lấy phần nén
+                    const decodedUrl = LZString.decompressFromEncodedURIComponent(compressedUrl); // Giải nén URL
+                    
                     // Tự động chuyển hướng đến URL đã giải mã
-                    window.location.href = decodedUrl;
+                    if (decodedUrl) {
+                        window.location.href = decodedUrl;
+                    } else {
+                        alert('Không thể giải mã URL!');
+                    }
                 } else {
                     alert('Mã không hợp lệ!');
                 }
