@@ -3,17 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL </title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-        const CLIENT_ID = '434926117326-7lrc46eiahe1o5qfrddartlgulitg4qc.apps.googleusercontent.com'; // Thay thế bằng Client ID của bạn
-        const API_KEY = 'AIzaSyCrtURqn1TLFpfot5Do-VmJcKcTtfpShyU'; // Thay thế bằng API key của bạn
-        const SPREADSHEET_ID = '1ViwVl74RTS3Cj2nl0TJfW5Lh7q_01cbFQ5ePVB9n_TA'; // Thay thế bằng ID của Google Sheet của bạn
-        const SHEET_NAME = 'URL'; // Thay thế bằng tên sheet của bạn
-        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+    <title>Mã hóa URL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mã hóa URL</h1>
+    <label for="urlInput">Nhập URL của bạn:</label><br>
+    <input type="text" id="urlInput" placeholder="https://example.com" required><br>
+    <button id="encodeButton">Mã hóa</button>
+    
+    <h2>Kết quả:</h2>
+    <p id="result"></p>
 
-        function generateShortId(length) {
+    <script>
+        function generateRandomCode(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let result = '';
             for (let i = 0; i < length; i++) {
@@ -22,131 +34,21 @@
             return result;
         }
 
-        function isValidUrl(url) {
-            const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-                '((([a-z\\d]([a-z\\d-]*[a-z\\d])?)\\.)+[a-z]{2,}|' + // domain name
-                'localhost|' + // localhost
-                '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|' + // IP address
-                '\\[?[a-fA-F0-9]*:[a-fA-F0-9:]+\\]?)' + // IPv6
-                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-            return !!pattern.test(url);
-        }
-
-        function handleClientLoad() {
-            gapi.load('client:auth2', initClient);
-        }
-
-        function initClient() {
-            gapi.client.init({
-                apiKey: API_KEY,
-                clientId: CLIENT_ID,
-                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
-                scope: SCOPES
-            }).then(() => {
-                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-                updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-            });
-        }
-
-        function updateSigninStatus(isSignedIn) {
-            if (isSignedIn) {
-                document.getElementById('authorize_button').style.display = 'none';
-                document.getElementById('signout_button').style.display = 'block';
-            } else {
-                document.getElementById('authorize_button').style.display = 'block';
-                document.getElementById('signout_button').style.display = 'none';
-            }
-        }
-
-        function handleAuthClick(event) {
-            gapi.auth2.getAuthInstance().signIn();
-        }
-
-        function handleSignoutClick(event) {
-            gapi.auth2.getAuthInstance().signOut();
-        }
-
-        function encodeUrl() {
+        document.getElementById('encodeButton').addEventListener('click', function() {
             const url = document.getElementById('urlInput').value;
-            if (!url || !isValidUrl(url)) {
-                alert("Vui lòng nhập một URL hợp lệ.");
-                return;
+            if (url) {
+                const encodedUrl = btoa(url); // Mã hóa URL bằng Base64
+                const randomCode = generateRandomCode(8); // Tạo mã ngẫu nhiên 8 ký tự
+                const finalCode = `${randomCode}-${encodedUrl}`; // Kết hợp mã ngẫu nhiên và URL đã mã hóa
+                document.getElementById('result').innerText = `Mã đã mã hóa: ${finalCode}`;
+                
+                // Chuyển hướng đến trang giải mã với mã đã mã hóa
+                const decodeUrl = `decode-url.html?code=${encodeURIComponent(finalCode)}`;
+                document.getElementById('result').innerHTML += `<br><a href="${decodeUrl}">Nhấn vào đây để giải mã</a>`;
+            } else {
+                alert('Vui lòng nhập URL!');
             }
-
-            let shortId;
-            do {
-                shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
-            } while (checkDuplicate(shortId)); // Kiểm tra trùng lặp
-
-            // Mã hóa URL bằng AES
-            const secretKey = '123'; // Khóa bí mật
-            const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
-
-            // Lưu trữ URL đã mã hóa vào Google Sheets
-            saveUrl(shortId, encryptedUrl);
-
-            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
-            const redirectLink = `https://bitly.li/NTyH?url=${encodedShortId}`;
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
-            document.getElementById('copyButton').style.display = 'inline-block';
-        }
-
-        function saveUrl(shortId, encryptedUrl) {
-            const params = {
-                spreadsheetId: SPREADSHEET_ID,
-                range: `${SHEET_NAME}!A:B`,
-                valueInputOption: 'RAW',
-                insertDataOption: 'INSERT_ROWS'
-            };
-
-            const valueRangeBody = {
-                "values": [
-                    [shortId, encryptedUrl]
-                ]
-            };
-
-            gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody).then(response => {
-                console.log(response);
-            }, error => {
-                console.error(error);
-            });
-        }
-
-        function checkDuplicate(shortId) {
-            const params = {
-                spreadsheetId: SPREADSHEET_ID,
-                range: `${SHEET_NAME}!A:A`
-            };
-
-            gapi.client.sheets.spreadsheets.values.get(params).then(response => {
-                const rows = response.result.values || [];
-                return rows.some(row => row[0] === shortId);
-            }, error => {
-                console.error(error);
-                return false;
-            });
-        }
-
-        function copyToClipboard() {
-            const encodedOutput = document.getElementById('encodedOutput').innerText;
-            const link = encodedOutput.replace('Liên kết đã mã hóa: ', '');
-            navigator.clipboard.writeText(link).then(() => {
-                alert('Đã sao chép liên kết vào clipboard!');
-            }, () => {
-                alert('Không thể sao chép liên kết.');
-            });
-        }
+        });
     </script>
-</head>
-<body onload="handleClientLoad()">
-    <h1>Mã hóa URL</h1>
-    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
-    <button onclick="encodeUrl()">Mã hóa</button>
-    <p id="encodedOutput"></p>
-    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Sao chép liên kết</button>
-    <button id="authorize_button" style="display: none;" onclick="handleAuthClick()">Authorize</button>
-    <button id="signout_button" style="display: none;" onclick="handleSignoutClick()">Sign Out</button>
 </body>
 </html>
