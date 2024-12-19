@@ -16,7 +16,7 @@
     </style>
 </head>
 <body>
-    <h1>Mã hóa URL A</h1>
+    <h1>Mã hóa URL</h1>
     <label for="urlInput">Nhập URL của bạn:</label><br>
     <input type="text" id="urlInput" placeholder="https://example.com" required><br>
     <button id="encodeButton">Mã hóa</button>
@@ -25,37 +25,21 @@
     <p id="result"></p>
 
     <script>
-        const urlMapping = {}; // Bảng ánh xạ URL
-        const base62Chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-        function generateRandomCode(length) {
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += base62Chars.charAt(Math.floor(Math.random() * base62Chars.length));
+        function generateShortCode(url) {
+            // Tạo mã ngắn từ URL bằng cách lấy mã băm
+            let hash = 0;
+            for (let i = 0; i < url.length; i++) {
+                hash = (hash << 5) - hash + url.charCodeAt(i);
+                hash = hash & hash; // Chuyển đổi sang số nguyên 32-bit
             }
-            return result;
-        }
-
-        function encodeUrl(url) {
-            // Kiểm tra xem URL đã có trong bảng ánh xạ chưa
-            for (const [key, value] of Object.entries(urlMapping)) {
-                if (value === url) {
-                    return key; // Trả về mã ngắn nếu URL đã tồn tại
-                }
-            }
-            // Tạo mã ngẫu nhiên 5 ký tự
-            let shortCode;
-            do {
-                shortCode = generateRandomCode(5);
-            } while (urlMapping[shortCode]); // Đảm bảo mã ngẫu nhiên không bị trùng
-            urlMapping[shortCode] = url; // Thêm vào bảng ánh xạ
-            return shortCode;
+            // Chuyển đổi số băm thành chuỗi 5 ký tự
+            return Math.abs(hash).toString(36).slice(0, 5);
         }
 
         document.getElementById('encodeButton').addEventListener('click', function() {
             const url = document.getElementById('urlInput').value;
             if (url) {
-                const shortCode = encodeUrl(url); // Mã hóa URL
+                const shortCode = generateShortCode(url); // Mã hóa URL
                 const shareLink = `https://bitly.li/NTyH?code=${shortCode}`; // Tạo liên kết chia sẻ
                 document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a>`;
             } else {
