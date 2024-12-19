@@ -3,63 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giải mã URL</title>
+    <title>Redirect URL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script>
-        // Cấu hình Supabase
-        const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
-         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
       
+         const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
+         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
+    
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-        // Hàm giải mã URL
+        
         async function decodeUrl(shortenedUrl) {
             const { data, error } = await supabaseClient
                 .from('url_codes')
                 .select('original_url')
                 .eq('shortened_url', shortenedUrl)
-                .single(); // Lấy một bản ghi duy nhất
+                .single(); 
 
             if (error) {
-                console.error('Lỗi khi giải mã:', error);
-                document.getElementById('result').innerText = 'Không tìm thấy URL cho mã này.';
+                console.error('ERR:', error);
+                document.getElementById('result').innerText = 'URL ERR.';
                 return;
             }
 
             if (data) {
-                // Hiển thị thông báo đếm ngược
-                let countdown = 5; // Thời gian đếm ngược
-                document.getElementById('result').innerText = `Bạn sẽ được chuyển hướng đến URL gốc: ${data.original_url} trong ${countdown} giây.`;
+              
+                let countdown = 5; 
+                document.getElementById('result').innerText = `Please wait: ${data.original_url}  ${countdown} s.`;
                 
-                // Đếm ngược và chuyển hướng
+           
                 const interval = setInterval(() => {
                     countdown--;
-                    document.getElementById('result').innerText = `Bạn sẽ được chuyển hướng đến URL gốc: ${data.original_url} trong ${countdown} giây.`;
+                    document.getElementById('result').innerText = `Please wait: ${data.original_url} ${countdown} s.`;
                     if (countdown <= 0) {
                         clearInterval(interval);
-                        window.location.href = data.original_url; // Chuyển hướng đến URL gốc
-                    }
+                        window.location.href = data.original_url; 
                 }, 1000);
             } else {
-                document.getElementById('result').innerText = 'Không tìm thấy URL cho mã này.';
+                document.getElementById('result').innerText = 'URL ERR.';
             }
         }
-
-        // Khởi tạo sự kiện sau khi DOM đã tải
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code'); // Lấy mã từ URL
+            const code = urlParams.get('code'); 
             if (code) {
-                decodeUrl(code); // Giải mã URL
+                decodeUrl(code); 
             } else {
-                document.getElementById('result').innerText = 'Không có mã nào để giải mã.';
+                document.getElementById('result').innerText = 'NOT URL.';
             }
         });
     </script>
 </head>
 <body>
-    <h1>Giải mã URL</h1>
-    <h2>Kết quả:</h2>
-    <p id="result"></p>
+    <h1>Please wait for me a moment</h1>
+  
+    
+   
+    <iframe src="https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" width="100%" height="320" style="border:none;"></iframe>
 </body>
 </html>
