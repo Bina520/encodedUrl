@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mã hóa URL </title>
+    <title>Mã hóa URL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <script>
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyDcPeES3y_SJXE0NESUdsb46FFooU1OpZlmKyDUJTWJuToUG_iXPhSaP-pkfOriHoQ/exec'; // Thay thế bằng URL của Google Apps Script
+        const API_KEY = 'AIzaSyCrtURqn1TLFpfot5Do-VmJcKcTtfpShyU'; // Thay thế bằng API key của bạn
+        const SPREADSHEET_ID = '1ViwVl74RTS3Cj2nl0TJfW5Lh7q_01cbFQ5ePVB9n_TA'; // Thay thế bằng ID của Google Sheet của bạn
+        const SHEET_NAME = 'URL'; // Thay thế bằng tên sheet của bạn
 
         function generateShortId(length) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -29,62 +32,64 @@
             return !!pattern.test(url);
         }
 
-        async function encodeUrl() {
+        function encodeUrl() {
             const url = document.getElementById('urlInput').value;
             if (!url || !isValidUrl(url)) {
                 alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
 
-            let shortId;
-            do {
-                shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
-            } while (await checkDuplicate(shortId)); // Kiểm tra trùng lặp
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"]
+                });
 
-            // Mã hóa URL bằng AES
-            const secretKey = '123'; // Khóa bí mật
-            const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
+                let shortId;
+                do {
+                    shortId = generateShortId(10); // Tạo mã ngắn 10 ký tự
+                } while (await checkDuplicate(shortId)); // Kiểm tra trùng lặp
 
-            // Lưu trữ URL đã mã hóa vào Google Sheets
-            await saveUrl(shortId, encryptedUrl);
+                // Mã hóa URL bằng AES
+                const secretKey = 'my-secret-key'; // Khóa bí mật
+                const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
 
-            const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
-            const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
-            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
-            document.getElementById('copyButton').style.display = 'inline-block';
+                // Lưu trữ URL đã mã hóa vào Google Sheets
+                await saveUrl(shortId, encryptedUrl);
+
+                const encodedShortId = btoa(shortId); // Mã hóa shortId bằng Base64
+                const redirectLink = `${window.location.origin}/redirect.html?url=${encodedShortId}`;
+                document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${redirectLink}`;
+                document.getElementById('copyButton').style.display = 'inline-block';
+            });
         }
 
         async function saveUrl(shortId, encryptedUrl) {
-            const response = await fetch(scriptUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'save',
-                    shortId: shortId,
-                    encryptedUrl: encryptedUrl
-                })
-            });
-            const result = await response.json();
-            if (result.status !== 'success') {
-                alert('Lỗi khi lưu URL.');
-            }
+            const params = {
+                spreadsheetId: SPREADSHEET_ID,
+                range: `${SHEET_NAME}!A:B`,
+                valueInputOption: 'RAW',
+                insertDataOption: 'INSERT_ROWS'
+            };
+
+            const valueRangeBody = {
+                "values": [
+                    [shortId, encryptedUrl]
+                ]
+            };
+
+            await gapi.client.sheets.spreadsheets.values.append(params, valueRangeBody);
         }
 
         async function checkDuplicate(shortId) {
-            const response = await fetch(scriptUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'get',
-                    shortId: shortId
-                })
-            });
-            const result = await response.json();
-            return result.encryptedUrl !== undefined;
+            const params = {
+                spreadsheetId: SPREADSHEET_ID,
+                range: `${SHEET_NAME}!A:A`
+            };
+
+            const response = await gapi.client.sheets.spreadsheets.values.get(params);
+            const rows = response.result.values || [];
+            return rows.some(row => row[0] === shortId);
         }
 
         function copyToClipboard() {
