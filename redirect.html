@@ -3,14 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giải mã URL</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
-    <script>
-        // Cấu hình Supabase
-        const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
-         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
-    
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    <title>Decode</title>
+    <script type="module">
+        // Nhập các thông tin từ tệp cấu hình
+        import { supabaseUrl, supabaseAnonKey } from './config.js';
+
+        // Tạo client Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+        // Khóa bí mật cho mã hóa
+        const secretKey = 'YOUR_SECRET_KEY'; // Thay thế bằng khóa bí mật của bạn
+
+        // Hàm mã hóa URL
+        function encryptUrl(originalUrl) {
+            return CryptoJS.AES.encrypt(originalUrl, secretKey).toString();
+        }
+
+        // Hàm giải mã URL
+        function decryptUrl(encryptedUrl) {
+            const bytes = CryptoJS.AES.decrypt(encryptedUrl, secretKey);
+            return bytes.toString(CryptoJS.enc.Utf8);
+        }
+
+        // Hàm lưu URL đã mã hóa vào Supabase
+        async function saveUrl(originalUrl) {
+            const encryptedUrl = encryptUrl(originalUrl);
+            const { data, error } = await supabaseClient
+                .from('url_codes')
+                .insert([{ original_url: encryptedUrl, shortened_url: 'YOUR_SHORTENED_URL' }]); // Thay thế bằng mã rút gọn thực tế
+
+            if (error) {
+                console.error('Lỗi khi lưu URL:', error);
+            } else {
+                console.log('URL đã được lưu:', data);
+            }
+        }
 
         // Hàm giải mã URL
         async function decodeUrl(shortenedUrl) {
@@ -26,25 +54,38 @@
                 }
 
                 if (data) {
-                    // Hiển thị thông báo đếm ngược
+                    const originalUrl = decryptUrl(data.original_url); // Giải mã URL
+                    // Đếm ngược và chuyển hướng
                     let countdown = 5; // Thời gian đếm ngược
-                    document.getElementById('result').innerText = `Bạn sẽ được chuyển hướng đến URL gốc: ${data.original_url} trong ${countdown} giây.`;
-                    
+
                     // Đếm ngược và chuyển hướng
                     const interval = setInterval(() => {
                         countdown--;
-                        document.getElementById('result').innerText = `Bạn sẽ được chuyển hướng đến URL gốc: ${data.original_url} trong ${countdown} giây.`;
                         if (countdown <= 0) {
                             clearInterval(interval);
-                            window.location.href = data.original_url; // Chuyển hướng đến URL gốc
+                            window.location.href = originalUrl; // Chuyển hướng đến URL gốc
                         }
                     }, 1000);
+
+                    // Mở iframe quảng cáo
+                    const adIframe = document.getElementById('adIframe');
+                    adIframe.src = "YOUR_AD_LINK"; // Thay thế bằng liên kết quảng cáo thực tế
+
+                    // Kiểm tra xem iframe có bị chặn không
+                    adIframe.onload = function() {
+                        console.log("Iframe đã được tải thành công.");
+                    };
+
+                    adIframe.onerror = function() {
+                        console.error("Iframe không thể tải. Hiển thị nút mở liên kết quảng cáo.");
+                        document.getElementById('adError').style.display = 'block'; // Hiện thông báo lỗi
+                    };
                 } else {
-                    document.getElementById('result').innerText = 'Không tìm thấy URL cho mã này.';
+                    console.error('Không tìm thấy URL cho mã này.');
                 }
             } catch (err) {
                 console.error('Lỗi khi giải mã:', err);
-                document.getElementById('result').innerText = err.message;
+                alert(err.message);
             }
         }
 
@@ -55,17 +96,20 @@
             if (code) {
                 decodeUrl(code); // Giải mã URL
             } else {
-                document.getElementById('result').innerText = 'Không có mã nào để giải mã.';
+                alert('Không có mã nào để giải mã.');
             }
         });
     </script>
 </head>
 <body>
-    <h1>Giải mã URL</h1>
-    <h2>Kết quả:</h2>
-    <p id="result"></p>
+    <h1>Mã hóa và Giải mã URL</h1>
     
     <!-- Iframe hiển thị liên kết quảng cáo -->
-    <iframe src="YOUR_AD_LINK" width="100%" height="300" style="border:none;"></iframe>
+    <iframe id="adIframe" width="100%" height="300" style="border:none;"></iframe>
+    
+    <!-- Thông báo lỗi nếu iframe không tải được -->
+    <div id="adError" style="display:none;">
+        <p>Iframe không thể tải. Bạn có thể <a id="openAdLink" href="YOUR_AD_LINK" target="_blank">mở liên kết quảng cáo ở đây</a>.</p>
+    </div>
 </body>
 </html>
