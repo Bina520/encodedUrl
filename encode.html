@@ -51,7 +51,7 @@
                 } while (await checkDuplicate(shortId)); // Kiểm tra trùng lặp
 
                 // Mã hóa URL bằng AES
-                const secretKey = 'my-secret-key'; // Khóa bí mật
+                const secretKey = '123'; // Khóa bí mật
                 const encryptedUrl = CryptoJS.AES.encrypt(url, secretKey).toString();
 
                 // Lưu trữ URL đã mã hóa vào Google Sheets
