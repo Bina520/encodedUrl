@@ -4,16 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giải mã URL</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script>
-        window.onload = function() {
-            // Lấy mã đã mã hóa từ URL
+        // Cấu hình Supabase
+        const supabaseUrl = 'https://tioevxcsirewdkvqwqtb.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpb2V2eGNzaXJld2RrdnF3cXRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2MjE1MTUsImV4cCI6MjA1MDE5NzUxNX0.h3pE5dCCgZqcizxbLihDyGFD8oBUvnZUaTBWmxvM3M4';
+        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const encodedInput = urlParams.get('code');
             if (encodedInput) {
-                // Giải mã URL bằng Base64
-                const decodedUrl = atob(encodedInput);
-                // Tự động chuyển hướng đến URL đã giải mã
-                window.location.href = decodedUrl;
+                const { data, error } = await supabase
+                    .from('urls')
+                    .select('original_url')
+                    .eq('shortened_url', encodedInput)
+                    .single();
+
+                if (error || !data) {
+                    alert('Mã không hợp lệ hoặc không tồn tại!');
+                } else {
+                    window.location.href = data.original_url; // Chuyển hướng đến URL gốc
+                }
             } else {
                 alert('Mã không hợp lệ!');
             }
