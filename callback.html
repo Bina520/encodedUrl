@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorization Callback</title>
+</head>
+<body>
+    <h1>Authorization Callback</h1>
+    <p id="message"></p>
+
+    <script>
+        // Lấy mã xác thực từ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (code) {
+            document.getElementById('message').innerText = `Mã xác thực của bạn là: ${code}`;
+        } else {
+            document.getElementById('message').innerText = "Không có mã xác thực.";
+        }
+    </script>
+</body>
+</html>
