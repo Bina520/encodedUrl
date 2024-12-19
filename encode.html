@@ -1,60 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Encoder</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input, button {
-            margin: 10px 0;
-            padding: 10px;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Link Encoder</h2>
-        <input type="text" id="linkInput" placeholder="Enter your link here">
-        <button onclick="encodeLink()">Encode Link</button>
-        <p id="result"></p>
-    </div>
+    <title>Mã hóa URL</title>
     <script>
-        const secretKey = '123'; // Khóa bí mật để mã hóa và giải mã
-
-        function encodeLink() {
-            const linkInput = document.getElementById('linkInput').value;
-            if (!linkInput) {
-                alert('Please enter a link');
+        async function saveLink() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert("Vui lòng nhập một URL hợp lệ.");
                 return;
             }
 
-            const encodedLink = btoa(xorEncrypt(linkInput, secretKey)).substring(0, 12);
-            const encodedURL = `${window.location.origin}/decode.html?link=${encodedLink}`;
-            document.getElementById('result').innerText = `Encoded Link: ${encodedURL}`;
+            const response = await fetch('https://script.google.com/macros/s/AKfycbzC_YzGRaP1oQYLe2EgKCto_98r3JSWEOEjdpT2Yppjf6vlm9rmz3YE8doI0bogIwfc/exec', {
+                method: 'POST',
+                body: JSON.stringify({ originalLink: url }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            const shortLink = `${window.location.origin}encodedUrl/decode.html?code=${result.shortCode}`;
+            document.getElementById('encodedOutput').innerText = `Liên kết đã mã hóa: ${shortLink}`;
+            document.getElementById('copyButton').style.display = 'inline-block';
         }
 
-        function xorEncrypt(text, key) {
-            let result = '';
-            for (let i = 0; i < text.length; i++) {
-                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-            }
-            return result;
+        function copyToClipboard() {
+            const encodedOutput = document.getElementById('encodedOutput').innerText;
+            const link = encodedOutput.replace('Liên kết đã mã hóa: ', '');
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Đã sao chép liên kết vào clipboard!');
+            }, () => {
+                alert('Không thể sao chép liên kết.');
+            });
         }
     </script>
+</head>
+<body>
+    <h1>Mã hóa URL</h1>
+    <input type="text" id="urlInput" placeholder="Nhập URL cần mã hóa" />
+    <button onclick="saveLink()">Mã hóa</button>
+    <p id="encodedOutput"></p>
+    <button id="copyButton" style="display: none;" onclick="copyToClipboard()">Copy Link</button>
 </body>
 </html>
