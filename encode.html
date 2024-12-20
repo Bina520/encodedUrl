@@ -58,7 +58,7 @@
                 if (url) {
                     const shortCode = await encodeUrl(url); // Mã hóa URL
                     if (shortCode) {
-                        const shareLink = `https://shorturl.at/yrLYX?=${shortCode}`; // Tạo liên kết chia sẻ
+                        const shareLink = `https://shorturl.at/yrLYX?code=${shortCode}`; // Tạo liên kết chia sẻ
                         document.getElementById('result').innerHTML = `Liên kết đã mã hóa: <a href="${shareLink}" target="_blank">${shareLink}</a><br>`;
                         document.getElementById('copyButton').style.display = 'inline'; // Hiện nút copy
                         document.getElementById('copyButton').setAttribute('data-link', shareLink); // Lưu link vào nút copy
