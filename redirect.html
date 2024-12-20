@@ -3,93 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giải mã URL</title>
+    <title>Redirect URL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.js"></script>
     <script type="module">
-        // Nhập các thông tin từ tệp cấu hình
+        
         import { supabaseUrl, supabaseAnonKey } from './config.js';
 
-        // Tạo client Supabase
+       
         const { createClient } = supabase;
         const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-        // Hàm giải mã URL
+        
         async function decodeUrl(shortenedUrl) {
             try {
                 const { data, error } = await supabaseClient
                     .from('url_codes')
                     .select('original_url')
                     .eq('shortened_url', shortenedUrl)
-                    .single(); // Lấy một bản ghi duy nhất
+                    .single(); 
 
                 if (error) {
-                    throw new Error('Không tìm thấy URL cho mã này.');
+                    throw new Error('URL ERR');
                 }
 
                 if (data) {
-                    // Đếm ngược và chuyển hướng
-                    let countdown = 5; // Thời gian đếm ngược
+                    
+                    let countdown = 5; 
                     const originalUrl = data.original_url;
 
-                    // Hiển thị đếm ngược trên trang
+                 
                     const countdownDisplay = document.getElementById('countdown');
-                    countdownDisplay.innerText = `Chuyển hướng sau ${countdown} giây...`;
+                    countdownDisplay.innerText = `Please wait ${countdown} s...`;
 
                     const interval = setInterval(() => {
                         countdown--;
-                        countdownDisplay.innerText = `Chuyển hướng sau ${countdown} giây...`;
+                        countdownDisplay.innerText = `Please wait ${countdown} s...`;
                         if (countdown <= 0) {
                             clearInterval(interval);
-                            window.location.href = originalUrl; // Chuyển hướng đến URL gốc
+                            window.location.href = originalUrl; 
                         }
                     }, 1000);
 
-                    // Mở iframe quảng cáo
+                    
                     const adIframe = document.getElementById('adIframe');
-                    adIframe.src = "https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056"; // Thay thế bằng liên kết quảng cáo thực tế
+                    adIframe.src = "https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056";
 
-                    // Kiểm tra xem iframe có bị chặn không
+                    
                     adIframe.onload = function() {
-                        console.log("Iframe đã được tải thành công.");
+                        console.log("Iframe ERR.");
                     };
 
                     adIframe.onerror = function() {
-                        console.error("Iframe không thể tải. Hiển thị nút mở liên kết quảng cáo.");
-                        document.getElementById('adError').style.display = 'block'; // Hiện thông báo lỗi
+                        console.error("Iframe ERR.");
+                        document.getElementById('adError').style.display = 'block'; 
                     };
                 } else {
-                    console.error('Không tìm thấy URL cho mã này.');
+                    console.error('NOT URL');
                 }
             } catch (err) {
-                console.error('Lỗi khi giải mã:', err);
+                console.error('ERR:', err);
                 alert(err.message);
             }
         }
 
-        // Khởi tạo sự kiện sau khi DOM đã tải
+      
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code'); // Lấy mã từ URL
+            const code = urlParams.get('code'); 
             if (code) {
-                decodeUrl(code); // Giải mã URL
+                decodeUrl(code);
             } else {
-                alert('Không có mã nào để giải mã.');
+                alert('NOT CODE');
             }
         });
     </script>
 </head>
 <body>
-    <h1>Giải mã URL</h1>
+    <h1>Please wait for me a moment</h1>
     
-    <!-- Hiển thị đếm ngược -->
     <div id="countdown"></div>
     
-    <!-- Iframe hiển thị liên kết quảng cáo -->
-    <iframe id="adIframe" width="100%" height="300" style="border:none;"></iframe>
+   
+    <iframe id="adIframe" width="100%" height="320" style="border:none;"></iframe>
     
-    <!-- Thông báo lỗi nếu iframe không tải được -->
+   
     <div id="adError" style="display:none;">
-        <p>Iframe không thể tải. Bạn có thể <a id="openAdLink" href="https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" target="_blank">mở liên kết quảng cáo ở đây</a>.</p>
+        <p>Iframe ERR - Click here <a id="openAdLink" href="https://postponeclement.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" target="_blank"></a>.</p>
     </div>
 </body>
 </html>
