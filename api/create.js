@@ -1,58 +1,58 @@
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method not allowed" });
+  // ✅ Chỉ cho phép phương thức GET
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // ✅ Kiểm tra secret key để tránh spam
+  const key = req.query.key;
+  if (key !== process.env.MY_SECRET_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // 🔢 Sinh alias ngẫu nhiên 6 ký tự
+  const randomAlias = Math.random().toString(36).substring(2, 8);
+  const projectName = process.env.VERCEL_PROJECT || "encodedUrl";
   const token = process.env.VERCEL_TOKEN;
-  const projectId = process.env.VERCEL_PROJECT_ID; // 🧩 Project ID (prj_xxxxx)
   const rootDomain = "xbling.vercel.app";
 
-  if (!token || !projectId) {
-    return res.status(500).json({
-      error: "Missing VERCEL_TOKEN or VERCEL_PROJECT_ID",
-    });
+  if (!token) {
+    return res.status(500).json({ error: "Missing VERCEL_TOKEN env variable" });
   }
 
   try {
-    // 🧠 B1: Lấy deployment mới nhất của project
-    const deploymentsRes = await fetch(
-      `https://api.vercel.com/v6/deployments?projectId=${projectId}&limit=1`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    const deployments = await deploymentsRes.json();
-    const deploymentId = deployments.deployments?.[0]?.uid;
-
-    if (!deploymentId) {
-      throw new Error("No deployments found for this project");
-    }
-
-    // 🧠 B2: Sinh alias ngẫu nhiên
-    const randomAlias = Math.random().toString(36).substring(2, 8);
-    const alias = `${randomAlias}.${rootDomain}`;
-
-    // 🧠 B3: Gắn alias vào deployment hiện tại
-    const aliasRes = await fetch(`https://api.vercel.com/v2/aliases`, {
+    // 🚀 Gọi API Vercel để tạo alias (subdomain)
+    const response = await fetch(`https://api.vercel.com/v2/aliases`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        deploymentId,
-        alias,
+        deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
+        alias: `${randomAlias}.${rootDomain}`,
       }),
     });
 
-    const aliasData = await aliasRes.json();
+    const data = await response.json();
 
-    if (!aliasRes.ok) {
-      return res.status(500).json({
-        error: "Failed to create alias",
-        details: aliasData,
+    if (response.ok) {
+      res.status(200).json({
+        success: true,
+        alias: `${randomAlias}.${rootDomain}`,
+        url: `https://${randomAlias}.${rootDomain}`,
+      });
+    } else {
+      res.status(500).json({
+        error: "Vercel API failed",
+        details: data,
       });
     }
-
-    // ✅ Thành công
-    res.status(
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Internal error",
+      details: err.message,
+    });
+  }
+}
