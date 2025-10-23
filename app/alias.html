@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alias Manager</title>
+<style>
+body { font-family: Arial; padding: 30px; background: #f0f2f5; }
+h1 { text-align: center; }
+.container { max-width: 800px; margin: 0 auto; }
+input, button { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
+button { background: #4285f4; color: white; cursor: pointer; border: none; }
+button:hover { background: #3367d6; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { padding: 8px; border: 1px solid #ccc; text-align: left; }
+th { background: #eee; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Alias Manager</h1>
+
+<div>
+  <input type="text" id="customAlias" placeholder="Optional: type your alias">
+  <button id="createBtn">Create Alias</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Alias</th>
+      <th>URL</th>
+      <th>Created At</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="aliasTable">
+    <tr><td colspan="4" style="text-align:center">Loading...</td></tr>
+  </tbody>
+</table>
+</div>
+
+<script>
+const secretKey = "abc123xyz";
+
+async function fetchAliases() {
+  try {
+    const res = await fetch(`/api/create?key=${secretKey}&action=list`);
+    const data = await res.json();
+    const tbody = document.getElementById("aliasTable");
+    tbody.innerHTML = "";
+    if (data.success && data.aliases.length > 0) {
+      data.aliases.forEach(alias => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${alias.alias}</td>
+          <td><a href="${alias.url}" target="_blank">${alias.url}</a></td>
+          <td>${new Date(alias.createdAt).toLocaleString()}</td>
+          <td>
+            <button onclick="copyAlias('${alias.url}')">Copy</button>
+            <button onclick="deleteAlias('${alias.uid}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center">No aliases yet</td></tr>`;
+    }
+  } catch(err) { console.error(err); }
+}
+
+function copyAlias(url) {
+  navigator.clipboard.writeText(url).then(()=>alert("Copied!"));
+}
+
+async function deleteAlias(uid) {
+  if (!confirm("Delete this alias?")) return;
+  try {
+    const res = await fetch(`/api/create?key=${secretKey}&action=delete&uid=${uid}`);
+    const data = await res.json();
+    if (data.success) fetchAliases();
+    else alert("Delete failed: " + (data.error||"unknown"));
+  } catch(err) { alert("Delete failed"); console.error(err); }
+}
+
+async function createAlias() {
+  const custom = document.getElementById("customAlias").value.trim();
+  let url = `/api/create?key=${secretKey}&action=create`;
+  if (custom) url += `&alias=${encodeURIComponent(custom)}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.success) fetchAliases();
+    else alert("Create failed: " + (data.error||"unknown"));
+  } catch(err) { alert("Create failed"); console.error(err); }
+}
+
+document.getElementById("createBtn").addEventListener("click", createAlias);
+fetchAliases();
+</script>
+</body>
+</html>
