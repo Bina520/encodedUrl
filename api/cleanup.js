@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     }
 
     const now = Date.now();
-    const THIRTY_DAYS = 27 * 24 * 60 * 60 * 1000;
+    const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
     const deleted = [];
 
     for (const alias of aliases.aliases) {
