@@ -48,27 +48,48 @@
             display: flex;
             justify-content: space-between;
         }
+        
         .countdown-section {
-            background: rgba(255,255,255,0.2);
-            padding: 20px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            padding: 40px;
+            border-radius: 15px;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
+            border: 3px solid rgba(255,255,255,0.3);
         }
-        .countdown {
-            font-size: 3rem;
+        .wait-message {
+            font-size: 2rem;
             font-weight: bold;
-            color: #FFD700;
-            margin: 15px 0;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .target {
-            background: rgba(255,255,255,0.3);
-            padding: 10px 20px;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 20px 30px;
+            border-radius: 25px;
             display: inline-block;
-            margin: 10px 0;
+            margin: 20px 0;
             font-weight: bold;
+            font-size: 1.5rem;
+            border: 2px solid #ffd700;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+        .countdown {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 25px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            animation: pulse 1s infinite;
+        }
+        .redirect-message {
+            font-size: 1.3rem;
+            margin-top: 20px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        
         .loading {
             text-align: center;
             padding: 20px;
@@ -82,9 +103,15 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -103,10 +130,11 @@
         </div>
         
         <div class="countdown-section" id="countdown-section">
-            <div>Redirecting to:</div>
-            <div class="target" id="target">your-site.com</div>
+            <div>Please wait 5 seconds</div>
+            <div class="target" id="target">Uncensored Video Only 18+</div>
             <div class="countdown" id="countdown">6</div>
             <p>Automatic redirect in progress...</p>
+            <p>Warning! The content you are about to watch may not be appropriate for viewers under 18 years old.</p>
         </div>
     </div>
 
