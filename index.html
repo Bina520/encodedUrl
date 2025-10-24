@@ -120,18 +120,21 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-    
+    // 📰 PHIÊN BẢN CHẮC CHẮN HIỂN THỊ ẢNH
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
+      const proxyURL = `https://corsproxy.io/?${encodeURIComponent(rssURL)}`;
 
       try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`);
-        const data = await res.json();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "text/xml");
+        const res = await fetch(proxyURL);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const text = await res.text();
 
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, "text/xml");
         const items = xml.querySelectorAll("item");
+
         if (!items.length) {
           container.innerHTML = '<div class="loading">No news found.</div>';
           return;
@@ -139,14 +142,14 @@
 
         let newsHTML = '';
         items.forEach((item, idx) => {
-          if (idx >= 8) return; 
+          if (idx >= 8) return;
 
           const title = item.querySelector("title")?.textContent || "Untitled";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
-
-        
           const desc = item.querySelector("description")?.textContent || "";
+
+          // trích ảnh từ description
           const imgMatch = desc.match(/<img[^>]+src="([^">]+)"/);
           const thumb = imgMatch ? imgMatch[1] : "https://via.placeholder.com/100x70?text=News";
 
@@ -178,7 +181,7 @@
         return;
       }
 
-      let seconds = 5;
+      let seconds = 7;
       const countdownEl = document.getElementById('countdown');
       const timer = setInterval(() => {
         seconds--;
