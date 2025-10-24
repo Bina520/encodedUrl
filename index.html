@@ -134,7 +134,7 @@
     // ✅ LOAD NEWS WITH THUMBNAIL (BBC feed - real images)
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
-      const rssURL = 'https://feeds.bbci.co.uk/news/rss.xml'; // BBC feed có ảnh thật
+      const rssURL = 'https://feeds.bbci.co.uk/news/rss.xml'; 
       const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
 
       try {
