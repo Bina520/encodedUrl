@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>News Updates</title>
+  <title>News Updates (Fixed Thumbnails)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -120,10 +120,10 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-    // 📰 LOAD NEWS FROM RSS2JSON (with image extraction)
+    // ✅ LOAD NEWS WITH THUMBNAIL (BBC feed - real images)
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
-      const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
+      const rssURL = 'https://feeds.bbci.co.uk/news/rss.xml'; // BBC có ảnh thật
       const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
 
       try {
@@ -141,12 +141,8 @@
           const link = item.link;
           const pubDate = new Date(item.pubDate).toLocaleDateString();
 
-          // ✅ Extract thumbnail from <img> in item.content
-          let thumb = 'https://via.placeholder.com/100x70?text=News';
-          const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
-          if (imgMatch && imgMatch[1]) {
-            thumb = imgMatch[1];
-          }
+          // ✅ BBC có thumbnail chuẩn
+          let thumb = item.thumbnail || 'https://via.placeholder.com/100x70?text=News';
 
           newsHTML += `
             <div class="news-item">
