@@ -120,34 +120,35 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-    // 📰 LẤY TIN + ẢNH TỪ RSS GOOGLE NEWS (CÓ SỬA)
+    
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
-      const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
 
       try {
-        const res = await fetch(apiURL);
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`);
         const data = await res.json();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, "text/xml");
 
-        if (!data.items || !data.items.length) {
+        const items = xml.querySelectorAll("item");
+        if (!items.length) {
           container.innerHTML = '<div class="loading">No news found.</div>';
           return;
         }
 
         let newsHTML = '';
-        data.items.slice(0, 8).forEach(item => {
-          console.log(item); // debug nếu cần xem cấu trúc
-          const title = item.title;
-          const link = item.link;
-          const pubDate = new Date(item.pubDate).toLocaleDateString();
+        items.forEach((item, idx) => {
+          if (idx >= 8) return; 
 
-          // 🔍 Lấy ảnh từ nội dung bài viết (content)
-          let thumb = 'https://via.placeholder.com/100x70?text=News';
-          const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
-          if (imgMatch) {
-            thumb = imgMatch[1];
-          }
+          const title = item.querySelector("title")?.textContent || "Untitled";
+          const link = item.querySelector("link")?.textContent || "#";
+          const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
+
+        
+          const desc = item.querySelector("description")?.textContent || "";
+          const imgMatch = desc.match(/<img[^>]+src="([^">]+)"/);
+          const thumb = imgMatch ? imgMatch[1] : "https://via.placeholder.com/100x70?text=News";
 
           newsHTML += `
             <div class="news-item">
@@ -155,7 +156,7 @@
               <div class="news-content">
                 <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
                 <div class="news-meta">
-                  <span>${data.feed.title}</span>
+                  <span>Google News</span>
                   <span>${pubDate}</span>
                 </div>
               </div>
@@ -177,7 +178,7 @@
         return;
       }
 
-      let seconds = 7;
+      let seconds = 5;
       const countdownEl = document.getElementById('countdown');
       const timer = setInterval(() => {
         seconds--;
