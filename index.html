@@ -120,38 +120,33 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-    // 📰 PHIÊN BẢN CHẮC CHẮN HIỂN THỊ ẢNH
+    // 📰 LOAD NEWS FROM RSS2JSON (with image extraction)
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
-      const proxyURL = `https://corsproxy.io/?${encodeURIComponent(rssURL)}`;
+      const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
 
       try {
-        const res = await fetch(proxyURL);
-        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-        const text = await res.text();
+        const res = await fetch(apiURL);
+        const data = await res.json();
 
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "text/xml");
-        const items = xml.querySelectorAll("item");
-
-        if (!items.length) {
+        if (!data.items || !data.items.length) {
           container.innerHTML = '<div class="loading">No news found.</div>';
           return;
         }
 
         let newsHTML = '';
-        items.forEach((item, idx) => {
-          if (idx >= 8) return;
+        data.items.slice(0, 8).forEach(item => {
+          const title = item.title;
+          const link = item.link;
+          const pubDate = new Date(item.pubDate).toLocaleDateString();
 
-          const title = item.querySelector("title")?.textContent || "Untitled";
-          const link = item.querySelector("link")?.textContent || "#";
-          const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
-          const desc = item.querySelector("description")?.textContent || "";
-
-          // trích ảnh từ description
-          const imgMatch = desc.match(/<img[^>]+src="([^">]+)"/);
-          const thumb = imgMatch ? imgMatch[1] : "https://via.placeholder.com/100x70?text=News";
+          // ✅ Extract thumbnail from <img> in item.content
+          let thumb = 'https://via.placeholder.com/100x70?text=News';
+          const imgMatch = item.content?.match(/<img[^>]+src="([^">]+)"/);
+          if (imgMatch && imgMatch[1]) {
+            thumb = imgMatch[1];
+          }
 
           newsHTML += `
             <div class="news-item">
@@ -159,7 +154,7 @@
               <div class="news-content">
                 <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
                 <div class="news-meta">
-                  <span>Google News</span>
+                  <span>${data.feed.title}</span>
                   <span>${pubDate}</span>
                 </div>
               </div>
