@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>News Updates (Fixed Thumbnails)</title>
+  <title>News Updates (with Banner)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -12,6 +12,10 @@
       padding: 20px;
       background: #f0f2f5;
       color: #333;
+    }
+    .banner {
+      margin-bottom: 20px;
+      text-align: center;
     }
     .simple-countdown {
       text-align: center;
@@ -84,6 +88,13 @@
   </style>
 </head>
 <body>
+
+  <!-- 🪧 BANNER -->
+  <div class="banner">
+    <script async="async" data-cfasync="false" src="//oblivionplaysaltered.com/8e7b09b4d12552eca1c325a5cdeec882/invoke.js"></script>
+    <div id="container-8e7b09b4d12552eca1c325a5cdeec882"></div>
+  </div>
+
   <div class="simple-countdown" id="countdown-section">
     <div>Please wait</div>
     <div class="countdown-number" id="countdown">7</div>
@@ -123,7 +134,7 @@
     // ✅ LOAD NEWS WITH THUMBNAIL (BBC feed - real images)
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
-      const rssURL = 'https://feeds.bbci.co.uk/news/rss.xml'; // BBC có ảnh thật
+      const rssURL = 'https://feeds.bbci.co.uk/news/rss.xml'; // BBC feed có ảnh thật
       const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
 
       try {
@@ -140,9 +151,7 @@
           const title = item.title;
           const link = item.link;
           const pubDate = new Date(item.pubDate).toLocaleDateString();
-
-          // ✅ BBC có thumbnail chuẩn
-          let thumb = item.thumbnail || 'https://via.placeholder.com/100x70?text=News';
+          const thumb = item.thumbnail || 'https://via.placeholder.com/100x70?text=News';
 
           newsHTML += `
             <div class="news-item">
