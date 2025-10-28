@@ -12,7 +12,6 @@
       padding: 20px;
       background: #f0f2f5;
       color: #333;
-      
     }
     .banner {
       text-align: center;
@@ -147,30 +146,26 @@
         return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
       }
 
+      // ✅ Sửa toàn bộ phần loadSimpleNews để hiển thị RSS qua rss2json
       async function loadSimpleNews() {
         const container = document.getElementById('news-container');
-        const rssURL = 'https://rss.app/feeds/v1.1/7zX3QG5s4o7LxFZx.xml';
+        const rssURL = 'https://rss2json.com/api.json?rss_url=https://rss.app/feeds/v1.1/7zX3QG5s4o7LxFZx.xml';
 
         try {
           const res = await fetch(rssURL);
-          const text = await res.text();
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(text, "application/xml");
-          const items = xml.querySelectorAll("item");
+          const data = await res.json();
 
-          if (!items.length) {
+          if (!data.items || !data.items.length) {
             container.innerHTML = '<div class="loading">No news found.</div>';
             return;
           }
 
           let newsHTML = "";
-          items.forEach((item, i) => {
-            if (i >= 8) return;
-            const title = item.querySelector("title")?.textContent || "Untitled";
-            const link = item.querySelector("link")?.textContent || "#";
-            const pubDate = new Date(item.querySelector("pubDate")?.textContent).toLocaleDateString();
-            const media = item.querySelector("media\\:content, enclosure");
-            const thumb = media?.getAttribute("url") || "https://via.placeholder.com/100x70?text=News";
+          data.items.slice(0, 8).forEach(item => {
+            const title = item.title;
+            const link = item.link;
+            const pubDate = new Date(item.pubDate).toLocaleDateString();
+            const thumb = item.thumbnail || "https://via.placeholder.com/100x70?text=News";
 
             newsHTML += `
               <div class="news-item">
@@ -178,7 +173,7 @@
                 <div class="news-content">
                   <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
                   <div class="news-meta">
-                    <span>Google News</span>
+                    <span>${item.source?.title || "Feed"}</span>
                     <span>${pubDate}</span>
                   </div>
                 </div>
