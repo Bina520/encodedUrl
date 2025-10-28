@@ -146,26 +146,35 @@
         return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
       }
 
-      // ✅ Sửa toàn bộ phần loadSimpleNews để hiển thị RSS qua rss2json
+      // ✅ Sửa toàn bộ phần loadSimpleNews để hiển thị RSS BBC qua proxy
       async function loadSimpleNews() {
         const container = document.getElementById('news-container');
-        const rssURL = 'https://rss2json.com/api.json?rss_url=https://rss.app/feeds/v1.1/7zX3QG5s4o7LxFZx.xml';
+        const rssFeed = 'https://feeds.bbci.co.uk/news/rss.xml';
+        const proxyURL = 'https://api.allorigins.win/get?url=' + encodeURIComponent(rssFeed);
 
         try {
-          const res = await fetch(rssURL);
+          const res = await fetch(proxyURL);
           const data = await res.json();
 
-          if (!data.items || !data.items.length) {
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(data.contents, "application/xml");
+          const items = xml.querySelectorAll("item");
+
+          if (!items.length) {
             container.innerHTML = '<div class="loading">No news found.</div>';
             return;
           }
 
           let newsHTML = "";
-          data.items.slice(0, 8).forEach(item => {
-            const title = item.title;
-            const link = item.link;
-            const pubDate = new Date(item.pubDate).toLocaleDateString();
-            const thumb = item.thumbnail || "https://via.placeholder.com/100x70?text=News";
+          items.forEach((item, i) => {
+            if (i >= 8) return;
+
+            const title = item.querySelector("title")?.textContent || "Untitled";
+            const link = item.querySelector("link")?.textContent || "#";
+            const pubDate = new Date(item.querySelector("pubDate")?.textContent).toLocaleDateString();
+            const description = item.querySelector("description")?.textContent || "";
+            const matchImg = description.match(/<img[^>]+src="([^"]+)"/);
+            const thumb = matchImg ? matchImg[1] : "https://via.placeholder.com/100x70?text=News";
 
             newsHTML += `
               <div class="news-item">
@@ -173,7 +182,7 @@
                 <div class="news-content">
                   <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
                   <div class="news-meta">
-                    <span>${item.source?.title || "Feed"}</span>
+                    <span>BBC News</span>
                     <span>${pubDate}</span>
                   </div>
                 </div>
